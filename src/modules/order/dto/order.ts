@@ -15,3 +15,9 @@ export class Order {
         }, 0);
     }
 }
+
+export class EmailOrder {
+    products:Product[]
+    price:number;
+    contact:string // <Email, nome, phone number
+}

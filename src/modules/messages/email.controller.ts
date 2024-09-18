@@ -1,4 +1,4 @@
-import { Order } from '../order/dto/order';
+import { EmailOrder } from '../order/dto/order';
 import { EmailService } from './../../services/email.service';
 import { Body, Controller,  Post } from '@nestjs/common';
 
@@ -8,7 +8,7 @@ export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
   @Post('send')
-  async sendEmail(@Body() order: Order) {
+  async sendEmail(@Body() order: EmailOrder) {
 
     const emailHtml = await this.emailService.generateOrderTemplate(order);
 

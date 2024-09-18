@@ -110,7 +110,7 @@ async exportToExcel(res: Response, order: Order) {
             doc.fillColor('#000').fontSize(16).font('Helvetica').text('Valor total do pedido:', 60, 160);
             doc.fontSize(24).font('Helvetica-Bold').fillColor('#000').text(`R$ ${order.price.toFixed(2)}`, 60, 180);
             //TODO - Definir como vai funcionar essa regra de desconto
-            doc.fontSize(12).fillColor('#2B7418').text(`20% Off`, 174, 188); // Mantendo o preço e desconto separados
+           // doc.fontSize(12).fillColor('#2B7418').text(`20% Off`, 174, 188); // Mantendo o preço e desconto separados
             doc.strokeColor('#D3D3D3'); // Define a cor da linha
             doc.moveTo(60, 210).lineTo(260, 210).stroke(); // Linha abaixo do card
 

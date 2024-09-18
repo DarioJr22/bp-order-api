@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
-import { Order } from 'src/modules/order/dto/order';
+import { EmailOrder } from 'src/modules/order/dto/order';
 // Carrega as variáveis do .env
 dotenv.config();
 
@@ -42,7 +42,7 @@ export class EmailService{
       }
     }
 
-   async generateOrderTemplate(order: Order) {
+   async generateOrderTemplate(order: EmailOrder) {
         let productsHtml = '';
     
         order.products.forEach((product) => {
@@ -137,6 +137,7 @@ export class EmailService{
                 <div class="order-details">
                     <h2>Detalhes da Ordem</h2>
                     <p><strong>Preço Total:</strong> R$ ${order.price.toFixed(2)}</p>
+                    <p><strong>Contato do cliente:</strong> ${order.contact}</p>
                 </div>
     
                 <table class="products-table">
