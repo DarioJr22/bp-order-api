@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Order } from '../order/dto/order';
 import * as PDFDocument from 'pdfkit';
 import * as ExcelJS from 'exceljs';
-import { Product } from '../product/dto/product';
+import { ProductDto } from '../product/dto/product';
 import { Response } from 'express';
 import { base64Image, base64ImageConcluido, base64ImagePdf } from 'src/shared/constants/imgs';
 
@@ -143,7 +143,7 @@ async exportToExcel(res: Response, order: Order) {
             doc.text('Valor Total', 420, tableTop + 8); // Valor Total
 
             // Linhas da tabela com os produtos
-            order.products.forEach((product: Product, i: number) => {
+            order.products.forEach((product: ProductDto, i: number) => {
             let y = itemTopPosition(i);
             if (y > 750) { // Limite de uma página A4
                 doc.addPage();

@@ -1,12 +1,12 @@
 import { Body, Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
-import { Product } from '../product/dto/product';
+import { ProductDto } from '../product/dto/product';
 import { Order } from './dto/order';
 
 @Controller('order')
 export class OrderController {
 
     @Post()
-    async postOrder(@Body() products:Product[]){
+    async postOrder(@Body() products:ProductDto[]){
         try {
           const order = new Order({products:products})
           return order

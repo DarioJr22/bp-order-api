@@ -1,18 +1,23 @@
 import {  Controller, Get, HttpException, HttpStatus, Logger, Param, Query } from "@nestjs/common";
 import { TinyService } from "src/services/tiny.service";
-import { SearchProductDto } from "./dto/request/searchProduct";
+
+import { ProductService } from "../service/product.service";
+import { SearchProductDto } from "../dto/searchProduct";
 
 @Controller('product')
 export class ProductController{
     
-    constructor(private tinyService:TinyService){}
+    constructor(private tinyService:TinyService,
+      private productService:ProductService
+    ){}
     
     @Get()
     async getAllProducts(){
         try {
-            const resp = await this.tinyService.searchProduct();
+            const resp = await this.productService.getAllProducts();
             return  resp
           } catch (error) {
+            console.log(error);
             throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
           }
     }
@@ -41,6 +46,9 @@ export class ProductController{
 
 
     //TODO - Filtrar a gente mesmo pq isso aqui não tá prestando
+    /* 
+    * @deprecated
+    */
     @Get('search')
     async searchProducts(
       @Query('pesquisa') pesquisa:string,

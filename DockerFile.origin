@@ -1,0 +1,62 @@
+# Use uma imagem base oficial do Node.js
+FROM node:18-alpine
+
+# Defina o diretório de trabalho na imagem do Docker
+WORKDIR /app
+
+# Copie o package.json e o package-lock.json para a imagem
+COPY package*.json ./
+
+# Instale as dependências
+RUN npm install
+
+# Copie o restante dos arquivos da aplicação para a imagem
+COPY . .
+
+# Comando de inicialização com um delay de 3 segundos
+CMD sleep 10 && npm start
+
+
+# Defina as variáveis de ambiente
+# Specify the variable you need
+
+
+#Email and Data base
+ARG GMAIL_NAME_SENDER 
+ARG GMAIL_SENDER 
+ARG GMAIL_PASSWORD 
+ARG DATABASEURL 
+ARG PORT 
+
+
+#database PSQL
+ARG PGUSER
+ARG PGPASSWORD
+ARG PGHOST
+ARG PGDATABASE
+
+#redis
+ARG REDISHOST
+ARG REDISPASSWORD
+ARG REDISPORT
+ARG REDIS_URL
+ARG APIKEY
+
+
+# Use the varible
+RUN echo $REDISHOST
+RUN echo $REDISPASSWORD
+RUN echo $REDISPORT
+RUN echo $REDIS_URL
+
+RUN echo $DATABASE_USERNAME
+RUN echo $DATABASE_PASSWORD
+RUN echo $PGHOST
+RUN echo $PGPASSWORD
+
+RUN echo $GMAIL_NAME_SENDER
+RUN echo $GMAIL_SENDER
+RUN echo $PORT
+
+
+

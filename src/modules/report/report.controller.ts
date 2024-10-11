@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Res } fr
 import { ReportService } from './report.service';
 import { Response } from 'express';
 import { Order } from '../order/dto/order';
-import { Product } from '../product/dto/product';
+import { ProductDto } from '../product/dto/product';
 import { imgs } from 'src/shared/constants/imgs';
 
 @Controller('report')
@@ -14,7 +14,7 @@ export class ReportController {
     @Post('/pdf')
       exportToPDF(
         @Res() res: Response,
-        @Body() products:Product[]) {
+        @Body() products:ProductDto[]) {
         try {
             const order = new Order({products:products})
             return this.exportService.exportOrderToPdf(res, order);
@@ -27,7 +27,7 @@ export class ReportController {
     @Post('/excel')
     exportToExcel(
         @Res() res: Response,
-        @Body() products:Product[]) {
+        @Body() products:ProductDto[]) {
         try {
             const order = new Order({products:products})
             return this.exportService.exportToExcel(res, order);

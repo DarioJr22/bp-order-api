@@ -1,9 +1,9 @@
-import { Product } from "src/modules/product/dto/product";
+import { ProductDto } from "src/modules/product/dto/product";
 
 export class Order {
     //In the future we will use users and admin.
     //This implementation its for an mvp without that logic.
-    products:Product[]
+    products:ProductDto[]
     price:number;
     constructor(private order:Partial<Order>){
         Object.assign(this,order);
@@ -17,7 +17,7 @@ export class Order {
 }
 
 export class EmailOrder {
-    products:Product[]
+    products:ProductDto[]
     price:number;
     contact:string // <Email, nome, phone number
 }
