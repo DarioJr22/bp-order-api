@@ -216,7 +216,7 @@ export class TinyService {
     return productIds;
   }
 
-  @Cron('0 59 19 * * *')
+  @Cron('0 22 22 * * *')
   async saveProductsScheduled() {
     console.log('Tarefa executada às 21:08!');
     const productIds = await this.getAllProductIds();
@@ -264,7 +264,7 @@ export class TinyService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  @Cron('0 19 21 * * *')
+
   async saveProducts() {
     /* 
     1 - Salva todos os produtos 
