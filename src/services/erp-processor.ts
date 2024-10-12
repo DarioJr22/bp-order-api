@@ -12,9 +12,9 @@ export class ErpDataProcessor extends WorkerHost {
   private readonly limiter: Bottleneck;
 
   constructor(
-    private productService: ProductService,
-    private tinyService: TinyService,
-    @InjectQueue('erp-data-queue') private erpDataQueue: Queue,
+    private readonly productService: ProductService,
+    private readonly tinyService: TinyService,
+    @InjectQueue('erp-data-queue') private readonly erpDataQueue: Queue,
   ) {
     super();
     // Configura o limitador para 30 requisições por minuto

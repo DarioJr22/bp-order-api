@@ -46,6 +46,11 @@ export class ProductService {
     return savedProduct;
   }
 
+  async truncateTables(){
+    this.anexoRepository.clear();
+    this.productRepository.clear();
+  }
+
 
 
   async getAllProducts(){

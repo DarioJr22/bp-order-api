@@ -20,8 +20,8 @@ export class TinyService {
 
   private readonly limiter: Bottleneck;
 
-  constructor(private productService: ProductService,
-    @InjectQueue('erp-data-queue') private erpDataQueue: Queue,
+  constructor(private readonly productService: ProductService,
+    @InjectQueue('erp-data-queue') private readonly erpDataQueue: Queue,
   ) {
     this.limiter = new Bottleneck({
       reservoir: 30,
@@ -146,16 +146,10 @@ export class TinyService {
       console.log(params)
       //Recover data from actual pages
       const resp = await axios.get<ReturnProductDto>(`${URLGETPROD}`, { params: params })
-
       //Set to next page
       page.pagina = ++resp.data.retorno.pagina
-
       //Get total number of pages
       page.numero_paginas = resp.data.retorno.numero_paginas
-
-      console.log(resp.data);
-      console.log(resp.data.retorno.pagina);
-
       //Put results to a 
       results.push(...resp.data.retorno.produtos)
     } while (page.pagina <= page.numero_paginas);
@@ -171,8 +165,6 @@ export class TinyService {
     try {
       const resp = await axios.get<{ retorno: { produto: ProductDto } }>(`${URLREADPROD}?token=${process.env.APIKEY}&formato=json&id=${id}`)
       resp.data.retorno.produto.saldo_estoque = await this.getStockProductBalance(id);
-
-
       return resp.data
     } catch (error) {
       return new HttpException('Erro ao buscar o produto', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -189,10 +181,6 @@ export class TinyService {
 
     return paramsHandler
   }
-
-
-
-  //Fila redis 
 
   async getAllProductIds(): Promise<string[]> {
     let productIds: string[] = [];
@@ -218,11 +206,21 @@ export class TinyService {
 
   @Cron('0 40 1 * * *')
   async saveProductsScheduled() {
-    console.log('Tarefa executada às 21:08!');
+    console.log('Tarefa executada às 22:40!');
+    //Recupera os ID's de todos os produtos
     const productIds = await this.getAllProductIds();
+    
+    //Limpa todas as tabelas envolvidas antes da transação começar
+    this.productService.truncateTables();
+    
+    //Pesquisa e salva cada um dos produtos usando a fila
     for (const id of productIds) {
       await this.erpDataQueue.add('fetch-and-save-product', { productId: id });
     }
+  }
+
+  async trucateTables(){
+
   }
 
 
@@ -258,39 +256,4 @@ export class TinyService {
       throw new Error('Erro ao consultar estoque');
     }
   }
-
-
-  sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-
-  async saveProducts() {
-    /* 
-    1 - Salva todos os produtos 
-    2 - Faz o mapeamento 
-           
-    
-    */
-
-    console.log('Tarefa executada às 18:08!');
-    const products = await this.getAllProducts();
-    products.forEach(
-      async (prd: ProductSearchReturn) => {
-
-        setTimeout(
-          async () => {
-            const prod = await this.findProductById(prd.produto.id);
-            console.log(prod);
-            console.log(prd);
-            console.log(prd.produto.id);
-            if (!(prod instanceof HttpException)) {
-              await this.productService.saveProductFromExternalSystem(prod.retorno.produto)
-            }
-          }
-          , 2000)
-      })
-  }
-
-
 }
