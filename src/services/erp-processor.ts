@@ -26,12 +26,12 @@ export class ErpDataProcessor extends WorkerHost {
     });
   }
 
-  async process(job: Job<{ productId: string }>): Promise<void> {
-    const { productId } = job.data;
+  async process(job: Job<{ productId: string ,store:'bravan' |'planet'}>): Promise<void> {
+    const { productId,store } = job.data;
     try {
       // Usa o limitador para controlar as requisições
       const productData = await this.limiter.schedule(() =>
-        this.tinyService.findProductById(productId),
+        this.tinyService.findProductById(productId,store),
       );
 
       if (!(productData instanceof HttpException)) {

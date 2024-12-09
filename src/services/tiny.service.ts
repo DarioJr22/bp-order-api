@@ -40,6 +40,8 @@ export class TinyService {
     }
   }
 
+
+
  
 
   async getFilterFields(fieldStr: string[]) {
@@ -108,11 +110,11 @@ export class TinyService {
 
 
 
-  async getStockProductBalance(idProduto: string) {
+  async getStockProductBalance(idProduto: string,token:string) {
 
     try {
       //Recover data from actual pages
-      const resp = await axios.get<ReturnStockDto<ProtucStocktDto>>(`${URLPRODEST}?token=${process.env.APIKEY}&formato=json&id=${idProduto}`)
+      const resp = await axios.get<ReturnStockDto<ProtucStocktDto>>(`${URLPRODEST}?token=${token}&formato=json&id=${idProduto}`)
       return resp.data.retorno.produto
     } catch (erro) {
       throw Error('Erro ao consultar estoque')
@@ -161,10 +163,11 @@ export class TinyService {
 
 
 
-  async findProductById(id: string) {
+  async findProductById(id: string,token:'bravan' | 'planet') {
+    const tk = token == 'bravan' ? process.env.APIKEY : process.env.APIKEY_PLANET
     try {
-      const resp = await axios.get<{ retorno: { produto: ProductDto } }>(`${URLREADPROD}?token=${process.env.APIKEY}&formato=json&id=${id}`)
-      resp.data.retorno.produto.saldo_estoque = await this.getStockProductBalance(id);
+      const resp = await axios.get<{ retorno: { produto: ProductDto } }>(`${URLREADPROD}?token=${tk}&formato=json&id=${id}`)
+      resp.data.retorno.produto.saldo_estoque = await this.getStockProductBalance(id,token);
       return resp.data
     } catch (error) {
       return new HttpException('Erro ao buscar o produto', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -182,7 +185,7 @@ export class TinyService {
     return paramsHandler
   }
 
-  async getAllProductIds(): Promise<string[]> {
+  async getAllProductIdsBravan(): Promise<string[]> {
     let productIds: string[] = [];
     let page = 1;
     let totalPages = 1;
@@ -204,14 +207,48 @@ export class TinyService {
     return productIds;
   }
 
+  async getAllProductIdsPlanet(): Promise<string[]> {
+    let productIds: string[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    do {
+      const resp = await axios.get<ReturnProductDto>(
+        `${URLGETPROD}?token=${process.env.APIKEY_PLANET}&formato=json&pagina=${page}`
+      );
+
+      if (resp.data.retorno.produtos) {
+        const ids = resp.data.retorno.produtos.map(prod => prod.produto.id);
+        productIds = productIds.concat(ids);
+      }
+
+      totalPages = resp.data.retorno.numero_paginas;
+      page++;
+    } while (page <= totalPages);
+
+    return productIds;
+  }
+
   @Cron('0 40 1 * * *')
-  async saveProductsScheduled() {
-    console.log('Tarefa executada às 22:40!');
+  async saveProductsScheduledBravan() {
     //Recupera os ID's de todos os produtos
-    const productIds = await this.getAllProductIds();
+    const productIds = await this.getAllProductIdsBravan();
     
     //Limpa todas as tabelas envolvidas antes da transação começar
     this.productService.truncateTables();
+    
+    //Pesquisa e salva cada um dos produtos usando a fila
+    for (const id of productIds) {
+      await this.erpDataQueue.add('fetch-and-save-product', { productId: id,store:'bravan' });
+    }
+
+    //Outras lojas
+    await this.saveProductsScheduledPlanet()
+  }
+
+  async saveProductsScheduledPlanet() {
+    //Recupera os ID's de todos os produtos
+    const productIds = await this.getAllProductIdsPlanet();
     
     //Pesquisa e salva cada um dos produtos usando a fila
     for (const id of productIds) {
@@ -219,30 +256,6 @@ export class TinyService {
     }
   }
 
-  async trucateTables(){
-
-  }
-
-
-  async findProductByIdScheduled(id: string) {
-    try {
-      const resp = await this.limiter.schedule(() =>
-        axios.get<{ retorno: { produto: ProductDto } }>(
-          `${URLREADPROD}?token=${process.env.APIKEY}&formato=json&id=${id}`
-        )
-      );
-
-      const produto = resp.data.retorno.produto;
-      produto.saldo_estoque = await this.getStockProductBalance(id);
-
-      return resp.data;
-    } catch (error) {
-      return new HttpException(
-        'Erro ao buscar o produto',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
 
   async getStockProductBalanceScheduled(idProduto: string) {
     try {

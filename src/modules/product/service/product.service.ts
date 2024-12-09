@@ -8,10 +8,10 @@ import { ProductDto } from '../dto/product';
 export class ProductService {
   constructor(
     @InjectRepository(Product)
-    private productRepository: Repository<Product>,
+    private readonly productRepository: Repository<Product>,
     
     @InjectRepository(AnexoEntity)
-    private anexoRepository: Repository<AnexoEntity>,
+    private readonly anexoRepository: Repository<AnexoEntity>,
   ) {}
 
   // Função para salvar o produto e anexos

@@ -22,16 +22,27 @@ export class ProductController{
           }
     }
 
+    @Get('planet')
+    async getPlanet(){
+      try {
+        const resp = await this.tinyService.saveProductsScheduledPlanet();
+        return  resp
+      } catch (error) {
+        console.log(error);
+        throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+
 
     @Get(':id')
-    async getProductsByID(@Param('id') id:string){
+    async getProductsByID(@Param('id') id:string,@Param('store') token:'bravan' | 'planet'){
         try {
 
             // Validação simples do ID (opcional)
             if (!id || typeof id !== 'string') {
               throw new HttpException('ID inválido', HttpStatus.BAD_REQUEST);
             }
-            const resp = await this.tinyService.findProductById(id);
+            const resp = await this.tinyService.findProductById(id,token);
 
               // Verifica se o produto foi encontrado
             if (!resp) {
