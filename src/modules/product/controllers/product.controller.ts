@@ -22,7 +22,7 @@ export class ProductController{
           }
     }
 
-    @Get('updates')
+    @Get('updates/:token')
     async updateStoreProducts(@Param('token') token:string){
       try {
         console.log(token);
