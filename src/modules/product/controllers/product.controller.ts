@@ -22,6 +22,17 @@ export class ProductController{
           }
     }
 
+    @Get('find-company-products/:company')
+    async getProductsByCompany(@Param('company') company:string){
+        try {
+            const resp = await this.productService.getProductsByEmpresa(company);
+            return  resp
+          } catch (error) {
+            console.log(error);
+            throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
+          }
+    }
+
     @Get('updates/:token')
     async updateStoreProducts(@Param('token') token:string){
       try {

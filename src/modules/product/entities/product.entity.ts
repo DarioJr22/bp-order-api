@@ -177,6 +177,10 @@ export class Product {
 
   @Column('simple-json', { nullable: true })
   saldo_estoque: any;
+
+  @Column({ nullable: true })
+  empresa: string;
+
 }
 
 

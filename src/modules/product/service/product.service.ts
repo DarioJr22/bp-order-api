@@ -64,4 +64,19 @@ export class ProductService {
       }
     }) ;
   }
+
+  async getProductsByEmpresa(empresa:string){
+    // eslint-disable-next-line prefer-const
+    let prds = await this.productRepository.find({
+      relations:['anexos'],
+      where:{
+        empresa:empresa
+      }
+    })
+    return prds.map(prd => {
+      return {
+        produto:prd
+      }
+    }) ;
+  }
 }
