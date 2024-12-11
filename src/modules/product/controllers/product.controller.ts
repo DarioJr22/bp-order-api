@@ -25,6 +25,8 @@ export class ProductController{
     @Get('updates')
     async updateStoreProducts(@Param('token') token:string){
       try {
+        console.log(token);
+        
         const resp = await this.tinyService.updateProductBase(token);
         return  resp
       } catch (error) {

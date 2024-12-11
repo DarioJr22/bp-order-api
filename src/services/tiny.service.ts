@@ -212,7 +212,8 @@ export class TinyService {
 async updateProductBase(token:string) {
     //Recupera os ID's de todos os produtos
     const productIds = await this.getAllProductIdsByToken(token);
-    
+    console.log('Passou pra update na base');
+
     //Pesquisa e salva cada um dos produtos usando a fila
     for (const id of productIds) {
       await this.erpDataQueue.add('fetch-and-save-product', { productId: id,token:token });
