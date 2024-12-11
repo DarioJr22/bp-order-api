@@ -70,7 +70,9 @@ export class ProductService {
     let prds = await this.productRepository.find({
       relations:['anexos'],
       where:{
-        empresa:empresa
+        empresa:empresa,
+        situacao:'A'
+
       }
     })
     return prds.map(prd => {
