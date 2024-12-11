@@ -6,7 +6,6 @@ import { SearchProductDto } from "src/modules/product/dto/searchProduct";
 import { ProtucStocktDto, ReturnStockDto } from "src/modules/product/dto/product-stock";
 import { ProductDto } from "src/modules/product/dto/product";
 import * as dotenv from 'dotenv';
-import { Cron } from "@nestjs/schedule";
 import { ProductService } from "src/modules/product/service/product.service";
 import Bottleneck from "bottleneck";
 import { InjectQueue } from "@nestjs/bullmq";
@@ -31,9 +30,9 @@ export class TinyService {
     });
   }
 
-  async searchProduct() {
+  async searchProduct(token:string) {
     try {
-      return this.getAllProducts()
+      return this.getAllProducts(token)
     } catch (error) {
       Logger.log(error)
       return new HttpException('Erro ao buscar os produtos', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -44,7 +43,7 @@ export class TinyService {
 
  
 
-  async getFilterFields(fieldStr: string[]) {
+  async getFilterFields(fieldStr: string[],token) {
     Logger.log(fieldStr)
     console.log(fieldStr)
     //Result 
@@ -52,7 +51,7 @@ export class TinyService {
 
     try {
       //Pegatodos os produtos
-      const resp = await this.searchProduct();
+      const resp = await this.searchProduct(token);
 
       //Pega todos os campos
       const fields: string[] = fieldStr
@@ -76,7 +75,7 @@ export class TinyService {
 
 
 
-  async getAllProducts() {
+  async getAllProducts(token) {
     //TODO - TIPAR ISSO
     // eslint-disable-next-line prefer-const
     let results: ProductSearchReturn[] = [];
@@ -88,7 +87,7 @@ export class TinyService {
 
     do {
       //Recover data from actual pages
-      const resp = await axios.get<ReturnProductDto>(`${URLGETPROD}?token=${process.env.APIKEY}&formato=json&pagina=${page.pagina}`)
+      const resp = await axios.get<ReturnProductDto>(`${URLGETPROD}?token=${token}&formato=json&pagina=${page.pagina}`)
       console.log(resp);
       //Set to next page
       page.pagina = ++resp.data.retorno.pagina
@@ -122,7 +121,7 @@ export class TinyService {
   }
 
 
-  async searchAllProducts(searchDto: SearchProductDto) {
+  async searchAllProducts(searchDto: SearchProductDto,token:string) {
     //TODO - TIPAR ISSO
     // eslint-disable-next-line prefer-const
     let results: any[] = [];
@@ -133,7 +132,7 @@ export class TinyService {
     };
 
     let params: any = {
-      token: process.env.APIKEY,
+      token: token,
       formato: 'json',
       pagina: page.pagina,
       pesquisa: searchDto.pesquisa || undefined,
@@ -163,10 +162,9 @@ export class TinyService {
 
 
 
-  async findProductById(id: string,token:'bravan' | 'planet') {
-    const tk = token == 'bravan' ? process.env.APIKEY : process.env.APIKEY_PLANET
+  async findProductById(id: string,token:string) {
     try {
-      const resp = await axios.get<{ retorno: { produto: ProductDto } }>(`${URLREADPROD}?token=${tk}&formato=json&id=${id}`)
+      const resp = await axios.get<{ retorno: { produto: ProductDto } }>(`${URLREADPROD}?token=${token}&formato=json&id=${id}`)
       resp.data.retorno.produto.saldo_estoque = await this.getStockProductBalance(id,token);
       return resp.data
     } catch (error) {
@@ -185,14 +183,14 @@ export class TinyService {
     return paramsHandler
   }
 
-  async getAllProductIdsBravan(): Promise<string[]> {
+  async getAllProductIdsByToken(token:string): Promise<string[]> {
     let productIds: string[] = [];
     let page = 1;
     let totalPages = 1;
 
     do {
       const resp = await axios.get<ReturnProductDto>(
-        `${URLGETPROD}?token=${process.env.APIKEY}&formato=json&pagina=${page}`
+        `${URLGETPROD}?token=${token}&formato=json&pagina=${page}`
       );
 
       if (resp.data.retorno.produtos) {
@@ -207,61 +205,31 @@ export class TinyService {
     return productIds;
   }
 
-  async getAllProductIdsPlanet(): Promise<string[]> {
-    let productIds: string[] = [];
-    let page = 1;
-    let totalPages = 1;
 
-    do {
-      const resp = await axios.get<ReturnProductDto>(
-        `${URLGETPROD}?token=${process.env.APIKEY_PLANET}&formato=json&pagina=${page}`
-      );
+//  @Cron('0 40 1 * * *')
+  
 
-      if (resp.data.retorno.produtos) {
-        const ids = resp.data.retorno.produtos.map(prod => prod.produto.id);
-        productIds = productIds.concat(ids);
-      }
-
-      totalPages = resp.data.retorno.numero_paginas;
-      page++;
-    } while (page <= totalPages);
-
-    return productIds;
-  }
-
-  @Cron('0 40 1 * * *')
-  async saveProductsScheduledBravan() {
+async updateProductBase(token:string) {
     //Recupera os ID's de todos os produtos
-    const productIds = await this.getAllProductIdsBravan();
+    const productIds = await this.getAllProductIdsByToken(token);
     
+    //Pesquisa e salva cada um dos produtos usando a fila
+    for (const id of productIds) {
+      await this.erpDataQueue.add('fetch-and-save-product', { productId: id,token:token });
+    }
+  }
+
+async truncateTable(){
     //Limpa todas as tabelas envolvidas antes da transação começar
     this.productService.truncateTables();
-    
-    //Pesquisa e salva cada um dos produtos usando a fila
-    for (const id of productIds) {
-      await this.erpDataQueue.add('fetch-and-save-product', { productId: id,store:'bravan' });
-    }
-
-    //Outras lojas
-    await this.saveProductsScheduledPlanet()
-  }
-
-  async saveProductsScheduledPlanet() {
-    //Recupera os ID's de todos os produtos
-    const productIds = await this.getAllProductIdsPlanet();
-    
-    //Pesquisa e salva cada um dos produtos usando a fila
-    for (const id of productIds) {
-      await this.erpDataQueue.add('fetch-and-save-product', { productId: id });
-    }
-  }
+}
 
 
-  async getStockProductBalanceScheduled(idProduto: string) {
+  async getStockProductBalanceScheduled(idProduto: string,token:string) {
     try {
       const resp = await this.limiter.schedule(() =>
         axios.get<ReturnStockDto<ProtucStocktDto>>(
-          `${URLPRODEST}?token=${process.env.APIKEY}&formato=json&id=${idProduto}`,
+          `${URLPRODEST}?token=${token}&formato=json&id=${idProduto}`,
         )
       );
       return resp.data.retorno.produto;

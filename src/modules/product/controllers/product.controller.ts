@@ -22,10 +22,10 @@ export class ProductController{
           }
     }
 
-    @Get('planet')
-    async getPlanet(){
+    @Get('updates')
+    async updateStoreProducts(@Param('token') token:string){
       try {
-        const resp = await this.tinyService.saveProductsScheduledPlanet();
+        const resp = await this.tinyService.updateProductBase(token);
         return  resp
       } catch (error) {
         console.log(error);
@@ -65,7 +65,8 @@ export class ProductController{
       @Query('pesquisa') pesquisa:string,
       @Query('idTag') idTag:number,
       @Query('situacao') situacao:string,
-      @Query('dataCriacao') dataCriacao:string){
+      @Query('dataCriacao') dataCriacao:string,
+      @Query('token') token:string){
 
       
         try {
@@ -76,7 +77,7 @@ export class ProductController{
               situacao:situacao,
               dataCriacao:dataCriacao
             })
-            const resp = await this.tinyService.searchAllProducts(searchProduct);
+            const resp = await this.tinyService.searchAllProducts(searchProduct,token);
             Logger.log(searchProduct)
             return  resp
           } catch (error) {
@@ -85,9 +86,9 @@ export class ProductController{
     }
 
     @Get('fields/getter')
-    async getFields(){
+    async getFields(@Param('token') token:string){
         try {
-            const resp = await this.tinyService.getFilterFields(['id','nome','tipoVariacao','situacao','codigo']);
+            const resp = await this.tinyService.getFilterFields(['id','nome','tipoVariacao','situacao','codigo'],token);
             return  resp
           } catch (error) {
             throw new HttpException('Erro ao recuperar os campos de filtro', HttpStatus.INTERNAL_SERVER_ERROR);

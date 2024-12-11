@@ -26,24 +26,24 @@ export class ErpDataProcessor extends WorkerHost {
     });
   }
 
-  async process(job: Job<{ productId: string ,store:'bravan' |'planet'}>): Promise<void> {
-    const { productId,store } = job.data;
+  async process(job: Job<{ productId: string ,token:string}>): Promise<void> {
+    const { productId,token } = job.data;
     try {
-      // Usa o limitador para controlar as requisições
-      const productData = await this.limiter.schedule(() =>
-        this.tinyService.findProductById(productId,store),
-      );
+        // Usa o limitador para controlar as requisições
+        const productData = await this.limiter.schedule(() =>
+          this.tinyService.findProductById(productId,token),
+        );
 
-      if (!(productData instanceof HttpException)) {
-        await this.productService.saveProductFromExternalSystem(
-          productData.retorno.produto,
-        );
-        this.logger.log(`Produto ${productId} processado com sucesso.`);
-      } else {
-        this.logger.error(
-          `Erro ao buscar o produto ${productId}: ${productData.message}`,
-        );
-      }
+        if (!(productData instanceof HttpException)) {
+          await this.productService.saveProductFromExternalSystem(
+            productData.retorno.produto,
+          );
+          this.logger.log(`Produto ${productId} processado com sucesso.`);
+        } else {
+          this.logger.error(
+            `Erro ao buscar o produto ${productId}: ${productData.message}`,
+          );
+        }
     } catch (error) {
       this.logger.error(
         `Erro ao processar o produto ${productId}: ${error.message}`,
