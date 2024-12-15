@@ -26,8 +26,10 @@ export class ErpDataProcessor extends WorkerHost {
     });
   }
 
-  async process(job: Job<{ id: string ,token:string,entity:string}>): Promise<void> {
+  async process(job: Job<{ id: string ,token:string,entity:'product' | 'order'}>): Promise<void> {
     const { id,token,entity } = job.data;
+    console.log(id,token,entity);
+    
     switch(entity){
       case 'product':
         await this.processProduct(id,token);
