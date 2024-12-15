@@ -53,6 +53,7 @@ export class ProductController{
         return  resp
       } catch (error) {
         console.log(error);
+        Logger.log(token)
         throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import axios from "axios";
-import { URL_ORDERS_DETAIL, URL_ORDERS_SEARCH, URLGETPROD, URLPRODEST, URLREADPROD } from "src/shared/constants/URLS";
+import { URL_INFO_MEPRESA, URL_ORDERS_DETAIL, URL_ORDERS_SEARCH, URLGETPROD, URLPRODEST, URLREADPROD } from "src/shared/constants/URLS";
 import { ProductSearchReturn, ReturnProductDto } from "src/modules/product/dto/returnProduct";
 import { SearchProductDto } from "src/modules/product/dto/searchProduct";
 import { ProtucStocktDto, ReturnStockDto } from "src/modules/product/dto/product-stock";
@@ -166,6 +166,15 @@ export class TinyService {
       return resp.data
     } catch (error) {
       return new HttpException('Erro ao buscar o produto', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
+
+  async findCompanyInfo(token:string){
+    try{
+      const resp = await axios.get(`${URL_INFO_MEPRESA}?token=${token}&formato=json`);
+      return resp.data
+    }catch(error){
+      return new HttpException('Erro ao buscar informações da empresa', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
