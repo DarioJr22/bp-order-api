@@ -45,16 +45,16 @@ export class ProductController{
       }
     }
 
-    @Get('update-order/:token')
+    @Get('order-update/:token')
     async updateStoreOrder(@Param('token') token:string){
       try {
         console.log(token);
-        const resp = await this.tinyService.updateOrderBaseBase(token);
+        const resp = await this.tinyService.updateOrderBase(token);
         return  resp
       } catch (error) {
         console.log(error);
         Logger.log(token)
-        throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException('Erro ao buscar Pedidos: ' + error.message, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
 

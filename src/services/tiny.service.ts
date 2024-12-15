@@ -253,11 +253,9 @@ async truncateTable(){
   }
 
   //Orders
-  async updateOrderBaseBase(token:string){
+  async updateOrderBase(token:string){
     console.log(token);
-    
     const OrdersId = await this.getPaginatedData(token,URL_ORDERS_SEARCH)
-  
     for(const id of OrdersId){
       this.erpDataQueue.add('fech-and-save-order',{
         id:id,
@@ -283,12 +281,13 @@ async truncateTable(){
       );
 
     if (resp.data.retorno.pedidos ) {
-        const ids = resp.data.retorno.pedidos.map(prod => prod.id);
+        const ids = resp.data.retorno.pedidos.map(prod => prod.pedido.id);
         productIds = productIds.concat(ids);
       }
 
       totalPages = resp.data.retorno.numero_paginas;
       page++;
+      console.log(page);
     } while (page <= totalPages);
 
     return productIds;

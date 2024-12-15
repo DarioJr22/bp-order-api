@@ -35,6 +35,8 @@ export interface PedidoTinyResponseDTO {
   }
   
   export interface Pedido {
+    
+    pedido:{
     id: string;
     numero: string;
     numero_ecommerce: string;
@@ -72,7 +74,7 @@ export interface PedidoTinyResponseDTO {
     url_rastreamento: string;
     id_nota_fiscal: string;
     intermediador: Intermediador;
-    id_natureza_operacao: string;
+    id_natureza_operacao: string;}
   }
   
   export interface Cliente {
@@ -193,6 +195,7 @@ export interface PedidoTinyResponseDTO {
     id_nota_fiscal: string;
     intermediador: Intermediador;
     id_natureza_operacao: string;
+    nomeEcommerce
   }
   
   export interface Cliente {

@@ -27,7 +27,15 @@ export class ProductService {
       Object.assign(order,OrderData);
       console.log(order);
       console.log(OrderData);
-    
+
+
+      order.ecommerce_id = OrderData.ecommerce.id
+      order.ecommerce_nomeEcommerce = OrderData.numero_ecommerce
+      order.ecommerce_numeroPedidoCanalVenda = OrderData.numero_ordem_compra
+      order.ecommerce_nomeEcommerce = OrderData.nomeEcommerce
+
+
+
     // 2. Salva o produto no banco de dados
       const savedOrder = await this.orderRepository.save(order);
 
@@ -68,6 +76,8 @@ export class ProductService {
   async truncateTables(){
     this.anexoRepository.clear();
     this.productRepository.clear();
+    this.orderRepository.clear();
+    
   }
 
   
