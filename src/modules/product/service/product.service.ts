@@ -27,13 +27,7 @@ export class ProductService {
       Object.assign(order,OrderData);
       console.log(order);
       console.log(OrderData);
-
-      
-
-
-      
-      
-      
+    
     // 2. Salva o produto no banco de dados
       const savedOrder = await this.orderRepository.save(order);
 

@@ -5,7 +5,6 @@ import { TinyService } from './tiny.service';
 import Bottleneck from 'bottleneck';
 import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ProductService } from 'src/modules/product/service/product.service';
-import axios from 'axios';
 
 @Processor('erp-data-queue')
 export class ErpDataProcessor extends WorkerHost {
@@ -36,6 +35,8 @@ export class ErpDataProcessor extends WorkerHost {
       case 'order':
         await this.processOrder(id,token)
         return;
+      default:
+        throw new HttpException('Entity cant be recognized',HttpStatus.BAD_GATEWAY);
     }
   }
 
