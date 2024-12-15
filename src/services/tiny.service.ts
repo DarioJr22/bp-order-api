@@ -245,6 +245,8 @@ async truncateTable(){
 
   //Orders
   async updateOrderBaseBase(token:string){
+    console.log(token);
+    
     const OrdersId = await this.getPaginatedData(token,URL_ORDERS_SEARCH)
   
     for(const id of OrdersId){
@@ -262,7 +264,10 @@ async truncateTable(){
     let productIds: any[] = [];
     let page = 1;
     let totalPages = 1;
-
+    console.log(url);
+    console.log(token);
+    
+    
     do {
       const resp = await axios.get<PedidoTinyResponseDTO>(
         `${url}?token=${token}&formato=json&pagina=${page}`
