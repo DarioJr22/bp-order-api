@@ -153,7 +153,7 @@ export class Product {
   imagens_externas: any[];
 
   @Column({ nullable: true })
-  classe_produto: string;
+  classe_produto: string; //Identifier kit case 
 
   @Column({ nullable: true })
   seo_title: string;
@@ -180,6 +180,10 @@ export class Product {
 
   @Column({ nullable: true })
   empresa: string;
+
+  @Column({nullable:true})
+  marketplace:string;
+
 
 }
 

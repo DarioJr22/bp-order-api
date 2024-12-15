@@ -3,8 +3,9 @@ import { InjectQueue, Processor, WorkerHost
 import { Job, Queue } from 'bullmq';
 import { TinyService } from './tiny.service';
 import Bottleneck from 'bottleneck';
-import { HttpException, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ProductService } from 'src/modules/product/service/product.service';
+import axios from 'axios';
 
 @Processor('erp-data-queue')
 export class ErpDataProcessor extends WorkerHost {
@@ -26,29 +27,60 @@ export class ErpDataProcessor extends WorkerHost {
     });
   }
 
-  async process(job: Job<{ productId: string ,token:string}>): Promise<void> {
-    const { productId,token } = job.data;
-    try {
-        // Usa o limitador para controlar as requisições
-        const productData = await this.limiter.schedule(() =>
-          this.tinyService.findProductById(productId,token),
-        );
-
-        if (!(productData instanceof HttpException)) {
-          await this.productService.saveProductFromExternalSystem(
-            productData.retorno.produto,
-          );
-          this.logger.log(`Produto ${productId} processado com sucesso.`);
-        } else {
-          this.logger.error(
-            `Erro ao buscar o produto ${productId}: ${productData.message}`,
-          );
-        }
-    } catch (error) {
-      this.logger.error(
-        `Erro ao processar o produto ${productId}: ${error.message}`,
-      );
-      throw error;
+  async process(job: Job<{ id: string ,token:string,entity:string}>): Promise<void> {
+    const { id,token,entity } = job.data;
+    switch(entity){
+      case 'product':
+        await this.processProduct(id,token);
+        return;
+      case 'order':
+        await this.processOrder(id,token)
+        return;
     }
   }
+
+
+  async processOrder(OrderId,token){
+    try{
+      const orderData = await this.limiter.schedule(() => this.tinyService.findOrderById(OrderId,token)) 
+
+      if (!(orderData instanceof HttpException)) {
+        await this.productService.saveOrderFromExternalSystem(orderData.retorno.pedido);
+        this.logger.log(`Pedido ${OrderId} processado com sucesso.`);
+      } else {
+        this.logger.error(
+          `Erro ao buscar o Pedido ${orderData}: ${orderData.message}`,
+        );
+      }
+    }catch(erro){
+      return new HttpException('Erro ao buscar o Pedido', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
+
+
+  async processProduct(productId,token){
+    try {
+      // Usa o limitador para controlar as requisições
+      const productData = await this.limiter.schedule(() =>
+        this.tinyService.findProductById(productId,token),
+      );
+
+      if (!(productData instanceof HttpException)) {
+        await this.productService.saveProductFromExternalSystem(
+          productData.retorno.produto,
+        );
+        this.logger.log(`Produto ${productId} processado com sucesso.`);
+      } else {
+        this.logger.error(
+          `Erro ao buscar o produto ${productId}: ${productData.message}`,
+        );
+      }
+  } catch (error) {
+    this.logger.error(
+      `Erro ao processar o produto ${productId}: ${error.message}`,
+    );
+    throw error;
+  }
+  }
+
 }

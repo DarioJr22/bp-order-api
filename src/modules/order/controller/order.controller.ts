@@ -1,6 +1,6 @@
 import { Body, Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
-import { ProductDto } from '../product/dto/product';
-import { Order } from './dto/order';
+import { Order } from '../dto/order';
+import { ProductDto } from 'src/modules/product/dto/product';
 
 @Controller('order')
 export class OrderController {

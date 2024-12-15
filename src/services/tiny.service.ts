@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import axios from "axios";
-import { URLGETPROD, URLPRODEST, URLREADPROD } from "src/shared/constants/URLS";
+import { URL_ORDERS_DETAIL, URL_ORDERS_SEARCH, URLGETPROD, URLPRODEST, URLREADPROD } from "src/shared/constants/URLS";
 import { ProductSearchReturn, ReturnProductDto } from "src/modules/product/dto/returnProduct";
 import { SearchProductDto } from "src/modules/product/dto/searchProduct";
 import { ProtucStocktDto, ReturnStockDto } from "src/modules/product/dto/product-stock";
@@ -10,6 +10,7 @@ import { ProductService } from "src/modules/product/service/product.service";
 import Bottleneck from "bottleneck";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
+import { PedidoTinyResponseDTO } from "src/modules/order/dto/order";
 dotenv.config();
 
 
@@ -38,10 +39,6 @@ export class TinyService {
       return new HttpException('Erro ao buscar os produtos', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
-
-
-
- 
 
   async getFilterFields(fieldStr: string[],token) {
     Logger.log(fieldStr)
@@ -172,6 +169,7 @@ export class TinyService {
     }
   }
 
+
   async removeUndefinedParams(params: { [key: string]: any }) {
     const paramsHandler = params
     Object.keys(paramsHandler).forEach(key => {
@@ -216,7 +214,13 @@ async updateProductBase(token:string) {
 
     //Pesquisa e salva cada um dos produtos usando a fila
     for (const id of productIds) {
-      await this.erpDataQueue.add('fetch-and-save-product', { productId: id,token:token });
+      await this.erpDataQueue.add('fetch-and-save-product', 
+        { 
+          productId: id,
+          token:token, 
+          entity:'product' 
+        }
+      );
     }
   }
 
@@ -236,6 +240,53 @@ async truncateTable(){
       return resp.data.retorno.produto;
     } catch (erro) {
       throw new Error('Erro ao consultar estoque');
+    }
+  }
+
+  //Orders
+  async updateOrderBaseBase(token:string){
+    const OrdersId = await this.getPaginatedData(token,URL_ORDERS_SEARCH)
+  
+    for(const id of OrdersId){
+      this.erpDataQueue.add('fech-and-save-order',{
+        id:id,
+        token:token,
+        entity:'order'
+      })
+    }
+
+  }
+
+
+  async getPaginatedData(token:string,url:string){
+    let productIds: any[] = [];
+    let page = 1;
+    let totalPages = 1;
+
+    do {
+      const resp = await axios.get<PedidoTinyResponseDTO>(
+        `${url}?token=${token}&formato=json&pagina=${page}`
+      );
+
+    if (resp.data.retorno.pedidos ) {
+        const ids = resp.data.retorno.pedidos.map(prod => prod.id);
+        productIds = productIds.concat(ids);
+      }
+
+      totalPages = resp.data.retorno.numero_paginas;
+      page++;
+    } while (page <= totalPages);
+
+    return productIds;
+  }
+
+  
+  async findOrderById(id:string,token:string){
+    try{
+      const resp = await axios.get(`${URL_ORDERS_DETAIL}?token=${token}&formato=json&id=${id}`)
+      return resp.data
+    }catch(error){
+      return new HttpException('Erro ao buscar o pedido', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 }

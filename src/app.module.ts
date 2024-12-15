@@ -3,8 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductController } from './modules/product/controllers/product.controller';
 import { TinyService } from './services/tiny.service';
-import { OrderController } from './modules/order/order.controller';
-import { OrderService } from './modules/order/order.service';
+
+import { OrderService } from './modules/order/service/order.service';
 import { ReportService } from './modules/report/report.service';
 import { ReportController } from './modules/report/report.controller';
 import { EmailController } from './modules/messages/email.controller';
@@ -17,6 +17,8 @@ import { AnexoEntity, Product } from './modules/product/entities/product.entity'
 import { BullModule } from '@nestjs/bullmq';
 import { ErpDataProcessor } from './services/erp-processor';
 import Redis from 'ioredis';
+import { Order } from './modules/order/entities/order.entity';
+import { OrderController } from './modules/order/controller/order.controller';
 //import Redis from 'ioredis';
 
 dotenv.config()
@@ -34,7 +36,7 @@ dotenv.config()
       synchronize: true, // NÃO USE EM PRODUÇÃO! Sincroniza o banco automaticamente
     }),
     // Registrar as entidades específicas com TypeOrmModule.forFeature
-    TypeOrmModule.forFeature([Product, AnexoEntity]),
+    TypeOrmModule.forFeature([Product, AnexoEntity,Order]),
     BullModule.forRoot({
       connection: new Redis(`${process.env.REDIS_URL}?family=0`,
         {

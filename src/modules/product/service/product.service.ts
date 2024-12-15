@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AnexoEntity, Product } from '../entities/product.entity';
 import { ProductDto } from '../dto/product';
+import { Order } from 'src/modules/order/entities/order.entity';
+import { PedidoDetailDTO } from 'src/modules/order/dto/order';
 
 @Injectable()
 export class ProductService {
@@ -12,7 +14,24 @@ export class ProductService {
     
     @InjectRepository(AnexoEntity)
     private readonly anexoRepository: Repository<AnexoEntity>,
+    
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
   ) {}
+
+
+  async saveOrderFromExternalSystem(
+    OrderData: PedidoDetailDTO): Promise<Order> {
+    // 1. Cria uma nova instância de Order com os dados recebidos
+      const order = new Order();
+      Object.assign(order,OrderData);
+      
+
+    // 2. Salva o produto no banco de dados
+      const savedOrder = await this.orderRepository.save(order);
+
+    return savedOrder;
+  }
 
   // Função para salvar o produto e anexos
   async saveProductFromExternalSystem(
@@ -23,10 +42,6 @@ export class ProductService {
 
 
     // 2. Salva o produto no banco de dados
-    console.log('Chegou aqui pelo menos');
-    console.log(productData);
-
-    
     const savedProduct = await this.productRepository.save(product);
 
     // 3. Salvar os anexos (se houver)
@@ -46,10 +61,15 @@ export class ProductService {
     return savedProduct;
   }
 
+
+
+
   async truncateTables(){
     this.anexoRepository.clear();
     this.productRepository.clear();
   }
+
+  
 
 
 
