@@ -25,8 +25,15 @@ export class ProductService {
     // 1. Cria uma nova instância de Order com os dados recebidos
       const order = new Order();
       Object.assign(order,OrderData);
+      console.log(order);
+      console.log(OrderData);
+
       
 
+
+      
+      
+      
     // 2. Salva o produto no banco de dados
       const savedOrder = await this.orderRepository.save(order);
 
