@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { AnexoEntity, Product } from '../entities/product.entity';
 import { ProductDto } from '../dto/product';
 import { Order } from 'src/modules/order/entities/order.entity';
@@ -21,25 +21,29 @@ export class ProductService {
 
 
   async saveOrderFromExternalSystem(
-    OrderData: PedidoDetailDTO): Promise<Order> {
+    OrderData: PedidoDetailDTO
+  ): Promise<any[]> {
     // 1. Cria uma nova instância de Order com os dados recebidos
+
+
+   const savedItems = OrderData.itens.map(async (item)=>{
+
       const order = new Order();
       Object.assign(order,OrderData);
       console.log(order);
       console.log(OrderData);
-
-
+      order.id_item = item.item.id_produto
       order.ecommerce_id = OrderData.ecommerce.id
       order.ecommerce_nomeEcommerce = OrderData.numero_ecommerce
       order.ecommerce_numeroPedidoCanalVenda = OrderData.numero_ordem_compra
       order.ecommerce_nomeEcommerce = OrderData.nomeEcommerce
-
-
-
-    // 2. Salva o produto no banco de dados
-      const savedOrder = await this.orderRepository.save(order);
-
-    return savedOrder;
+       // 2. Salva o produto no banco de dados
+       const savedOrder = await this.orderRepository.save(order);
+       return savedOrder
+    })
+     
+   
+    return await savedItems;
   }
 
   // Função para salvar o produto e anexos
@@ -49,7 +53,7 @@ export class ProductService {
     const product = new Product();
     Object.assign(product,productData);
     product.empresa = empresa;
-    
+
     // 2. Salva o produto no banco de dados
     const savedProduct = await this.productRepository.save(product);
 
@@ -101,7 +105,7 @@ export class ProductService {
     let prds = await this.productRepository.find({
       relations:['anexos'],
       where:{
-        empresa:empresa,
+        empresa:Like(`${empresa}`),
         situacao:'A'
 
       }
@@ -112,4 +116,16 @@ export class ProductService {
       }
     }) ;
   }
+
+
+  async putMarketPlacesOnProducts(){
+    (await this.orderRepository.find()).map(
+      (order) => this.productRepository.update(
+        {codigo:order.id_item},
+        {marketplace:order.ecommerce_nomeEcommerce}
+      )
+    )
+  }
+
+
 }

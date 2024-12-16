@@ -1,4 +1,4 @@
-import {  Controller, Get, HttpException, HttpStatus, Logger, Param, Query } from "@nestjs/common";
+import {  Controller, Delete, Get, HttpException, HttpStatus, Logger, Param, Query } from "@nestjs/common";
 import { TinyService } from "src/services/tiny.service";
 
 import { ProductService } from "../service/product.service";
@@ -33,7 +33,7 @@ export class ProductController{
           }
     }
 
-    @Get('updates/:token')
+    @Get('product-update/:token')
     async updateStoreProducts(@Param('token') token:string){
       try {
         console.log(token);
@@ -57,6 +57,23 @@ export class ProductController{
         Logger.log(token)
         throw new HttpException('Erro ao buscar Pedidos: ' + error.message, HttpStatus.INTERNAL_SERVER_ERROR);
       }
+    }
+
+
+    @Get('update-marketplaces')
+    async updateMarketPlacesOrder(){
+      try {
+        const resp = await this.productService.putMarketPlacesOnProducts();
+        return  resp
+      } catch (error) {
+        throw new HttpException('Erro ao buscar Pedidos: ' + error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+
+
+    @Delete()
+    async clearAll(){
+      return await this.tinyService.truncateTable()
     }
 
 

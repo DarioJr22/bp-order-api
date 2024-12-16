@@ -8,6 +8,9 @@ export class Order {
   @Column({ nullable: true })
   id: string;
 
+  @Column({nullable:true})
+  id_item:string;
+
   @Column({ nullable: true })
   numero: string;
 
@@ -47,6 +50,8 @@ export class Order {
   @Column({ type: 'jsonb', nullable: true })
   itens: any;
 
+
+ 
   // Armazena apenas os IDs dos itens (id_produto) como array de texto
   @Column("text", { array: true, nullable: true })
   item_ids: string[];
@@ -131,6 +136,9 @@ export class Order {
 
   @Column({ nullable: true })
   id_nota_fiscal: string;
+
+  
+  
 
   // Intermediador
   @Column({ type: 'jsonb', nullable: true })

@@ -263,6 +263,8 @@ async truncateTable(){
   }
 
 
+
+
   async getPaginatedData(token:string,url:string){
     let productIds: any[] = [];
     let page = 1;
@@ -286,6 +288,7 @@ async truncateTable(){
       console.log(page);
     } while (page <= totalPages);
 
+    
     return productIds;
   }
 
