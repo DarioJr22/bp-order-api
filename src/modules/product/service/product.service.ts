@@ -33,10 +33,9 @@ export class ProductService {
       console.log(order);
       console.log(OrderData);
       order.id_item = item.item.id_produto
-      order.ecommerce_id = OrderData.ecommerce.id
-      order.ecommerce_nomeEcommerce = OrderData.numero_ecommerce
-      order.ecommerce_numeroPedidoCanalVenda = OrderData.numero_ordem_compra
-      order.ecommerce_nomeEcommerce = OrderData.nomeEcommerce
+      order.ecommerce_id = await this.returnNullIfIsUndefined(OrderData.ecommerce.id,OrderData)
+      order.ecommerce_nomeEcommerce = await this.returnNullIfIsUndefined(OrderData.ecommerce.nomeEcommerce,OrderData)
+      order.ecommerce_numeroPedidoCanalVenda = await this.returnNullIfIsUndefined(OrderData.numero_ordem_compra,OrderData)
        // 2. Salva o produto no banco de dados
        const savedOrder = await this.orderRepository.save(order);
        return savedOrder
@@ -44,6 +43,22 @@ export class ProductService {
      
    
     return await savedItems;
+  }
+
+  async returnNullIfIsUndefined(value:any,obj:PedidoDetailDTO){
+
+    let returnValue = value ? value : null
+
+    if(
+      obj.ecommerce.nomeEcommerce == undefined || 
+      obj.ecommerce.nomeEcommerce == null || 
+      obj.ecommerce.nomeEcommerce == ''  && 
+      obj.forma_envio.includes("SHOPEE")   
+    ){
+      returnValue = obj.forma_envio
+    }
+
+    return returnValue
   }
 
   // Função para salvar o produto e anexos
@@ -121,7 +136,7 @@ export class ProductService {
   async putMarketPlacesOnProducts(){
     (await this.orderRepository.find()).map(
       (order) => this.productRepository.update(
-        {codigo:order.id_item},
+        {id:order.id_item},
         {marketplace:order.ecommerce_nomeEcommerce}
       )
     )

@@ -144,6 +144,4 @@ export class Order {
   @Column({ type: 'jsonb', nullable: true })
   intermediador: any;
 
-  @Column({ nullable: true })
-  id_natureza_operacao: string;
 }
