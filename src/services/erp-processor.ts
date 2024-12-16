@@ -49,6 +49,7 @@ export class ErpDataProcessor extends WorkerHost {
 
       if (!(orderData instanceof HttpException)) {
         await this.productService.saveOrderFromExternalSystem(orderData.retorno.pedido);
+
         this.logger.log(`Pedido ${OrderId} processado com sucesso.`);
       } else {
         this.logger.error(
@@ -68,9 +69,12 @@ export class ErpDataProcessor extends WorkerHost {
         this.tinyService.findProductById(productId,token),
       );
 
+      const companyInfo = await this.tinyService.findCompanyInfo(token)
+
       if (!(productData instanceof HttpException)) {
         await this.productService.saveProductFromExternalSystem(
           productData.retorno.produto,
+          companyInfo.retorno.conta.razao_social
         );
         this.logger.log(`Produto ${productId} processado com sucesso.`);
       } else {

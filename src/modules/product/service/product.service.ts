@@ -44,12 +44,12 @@ export class ProductService {
 
   // Função para salvar o produto e anexos
   async saveProductFromExternalSystem(
-    productData: ProductDto): Promise<Product> {
+    productData: ProductDto,empresa:string): Promise<Product> {
     // 1. Cria uma nova instância de Product com os dados recebidos
     const product = new Product();
     Object.assign(product,productData);
-
-
+    product.empresa = empresa;
+    
     // 2. Salva o produto no banco de dados
     const savedProduct = await this.productRepository.save(product);
 

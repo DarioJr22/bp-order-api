@@ -212,10 +212,6 @@ export class TinyService {
     return productIds;
   }
 
-
-//  @Cron('0 40 1 * * *')
-  
-
 async updateProductBase(token:string) {
     //Recupera os ID's de todos os produtos
     const productIds = await this.getAllProductIdsByToken(token);
@@ -225,7 +221,7 @@ async updateProductBase(token:string) {
     for (const id of productIds) {
       await this.erpDataQueue.add('fetch-and-save-product', 
         { 
-          productId: id,
+          id: id,
           token:token, 
           entity:'product' 
         }
