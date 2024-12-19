@@ -13,7 +13,7 @@ export class TaskService{
         
     }
     
-    @Cron("45 15 * * *")
+    @Cron("25 20 * * *")
     async updateUsersData(){
         this.TinyService.truncateOperationTable()
         const users = await this.UserService.getUsers();
