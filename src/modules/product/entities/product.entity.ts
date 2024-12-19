@@ -5,7 +5,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
-  PrimaryColumn,
+  
 } from 'typeorm';
 
 /* TODO - Criar coluna específica pra saldo de estoque */
@@ -13,7 +13,7 @@ import {
 // Entidade Product, associada à tabela 'produto'
 @Entity('produto')
 export class Product {
-  @PrimaryColumn({ type: 'varchar', length: 255 })
+  @PrimaryGeneratedColumn()
   id: string;
 
   @Column({ nullable: true })

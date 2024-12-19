@@ -1,16 +1,28 @@
-import { InjectQueue, Processor, WorkerHost
+import { InjectQueue, OnWorkerEvent, Processor, WorkerHost
  } from '@nestjs/bullmq';
 import { Job, Queue } from 'bullmq';
 import { TinyService } from './tiny.service';
 import Bottleneck from 'bottleneck';
 import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ProductService } from 'src/modules/product/service/product.service';
+import { EntityOperation } from 'src/shared/constants/entity-operation';
 
+export interface QueueDataProcessor {
+  id:string
+  token:string
+  entity?:EntityOperation
+}
 @Processor('erp-data-queue')
 export class ErpDataProcessor extends WorkerHost {
   private readonly logger = new Logger(ErpDataProcessor.name);
   private readonly limiter: Bottleneck;
+  QUEUE_DATA:QueueDataProcessor = {
+    id:'',
+  token:''
+  }
 
+  ENTITY_OPERATION = ''
+  private 
   constructor(
     private readonly productService: ProductService,
     private readonly tinyService: TinyService,
@@ -19,17 +31,32 @@ export class ErpDataProcessor extends WorkerHost {
     super();
     // Configura o limitador para 30 requisições por minuto
     this.limiter = new Bottleneck({
-      reservoir: 30, // Número máximo de requisições disponíveis
-      reservoirRefreshAmount: 30, // Quantidade de requisições a ser restaurada
-      reservoirRefreshInterval: 60 * 1000, // Intervalo em milissegundos (1 minuto)
+      reservoir: 40, // Número máximo de requisições disponíveis
+      reservoirRefreshAmount: 40, // Quantidade de requisições a ser restaurada
+      reservoirRefreshInterval: 60 * 500, // Intervalo em milissegundos (1 minuto)
       maxConcurrent: 1, // Número máximo de requisições simultâneas
     });
   }
 
-  async process(job: Job<{ id: string ,token:string,entity:'product' | 'order'}>): Promise<void> {
+  @OnWorkerEvent('drained')
+  onDrained(){
+   // this.logger.log(`Queue id ${job.data.id}`)
+
+    //If the product queue if finished start to get the order base.
+    //If the order quee is finished, put the marketplaces on products.
+    if(this.QUEUE_DATA.entity == EntityOperation.PRODUCT){
+      this.tinyService.updateOrderBase(this.QUEUE_DATA.token)
+    }else if(this.QUEUE_DATA.entity == EntityOperation.ORDER){
+      this.productService.putMarketPlacesOnProducts()
+    }
+  }
+
+  async process(job: Job<{ id: string ,token:string,entity:EntityOperation}>): Promise<void> {
     const { id,token,entity } = job.data;
+    Object.assign(this.QUEUE_DATA,job.data)
+ 
     console.log(id,token,entity);
-    
+
     switch(entity){
       case 'product':
         await this.processProduct(id,token);

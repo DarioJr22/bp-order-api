@@ -135,7 +135,7 @@ export interface PedidoTinyResponseDTO {
   }
   
   export interface Ecommerce {
-    id: string;
+    id: any;
     numeroPedidoEcommerce: string;
     numeroPedidoCanalVenda: string;
     nomeEcommerce: string;
@@ -256,7 +256,7 @@ export interface PedidoTinyResponseDTO {
   }
   
   export interface Ecommerce {
-    id: string;
+    id: any;
     numeroPedidoEcommerce: string;
     numeroPedidoCanalVenda: string;
     nomeEcommerce: string;

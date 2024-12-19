@@ -20,24 +20,6 @@ export class Order {
   @Column({ nullable: true })
   data_pedido: string;
 
-  @Column({ nullable: true })
-  data_prevista: string;
-
-  @Column({ nullable: true })
-  data_faturamento: string;
-
-  @Column({ nullable: true })
-  data_envio: string;
-
-  @Column({ nullable: true })
-  data_entrega: string;
-
-  @Column({ nullable: true })
-  id_lista_preco: string;
-
-  @Column({ nullable: true })
-  descricao_lista_preco: string;
-
   // Informações do cliente em formato JSON (opcional)
   @Column({ type: 'jsonb', nullable: true })
   cliente: any;
@@ -50,8 +32,6 @@ export class Order {
   @Column({ type: 'jsonb', nullable: true })
   itens: any;
 
-
- 
   // Armazena apenas os IDs dos itens (id_produto) como array de texto
   @Column("text", { array: true, nullable: true })
   item_ids: string[];
@@ -136,9 +116,6 @@ export class Order {
 
   @Column({ nullable: true })
   id_nota_fiscal: string;
-
-  
-  
 
   // Intermediador
   @Column({ type: 'jsonb', nullable: true })

@@ -11,6 +11,7 @@ import Bottleneck from "bottleneck";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
 import { PedidoTinyResponseDTO } from "src/modules/order/dto/order";
+import { EntityOperation } from "src/shared/constants/entity-operation";
 dotenv.config();
 
 
@@ -24,9 +25,9 @@ export class TinyService {
     @InjectQueue('erp-data-queue') private readonly erpDataQueue: Queue,
   ) {
     this.limiter = new Bottleneck({
-      reservoir: 30,
-      reservoirRefreshAmount: 30,
-      reservoirRefreshInterval: 60 * 1000,
+      reservoir: 40,
+      reservoirRefreshAmount: 40,
+      reservoirRefreshInterval: 60 * 500,
       maxConcurrent: 1,
     });
   }
@@ -97,13 +98,8 @@ export class TinyService {
       results.push(...result)
     } while (page.pagina <= page.numero_paginas);
 
-
-    //  results = await Promise.all(await this.iterateProductBalance(results))
     return results
   }
-
-
-
 
 
   async getStockProductBalance(idProduto: string,token:string) {
@@ -223,13 +219,13 @@ async updateProductBase(token:string) {
         { 
           id: id,
           token:token, 
-          entity:'product' 
+          entity:EntityOperation.PRODUCT 
         }
       );
     }
   }
 
-async truncateTable(){
+async truncateOperationTable(){
     //Limpa todas as tabelas envolvidas antes da transação começar
     this.productService.truncateTables();
 }
@@ -256,7 +252,7 @@ async truncateTable(){
       this.erpDataQueue.add('fech-and-save-order',{
         id:id,
         token:token,
-        entity:'order'
+        entity:EntityOperation.ORDER
       })
     }
 
@@ -274,9 +270,7 @@ async truncateTable(){
     
     
     do {
-      const resp = await axios.get<PedidoTinyResponseDTO>(
-        `${url}?token=${token}&formato=json&pagina=${page}`
-      );
+      const resp = await axios.get<PedidoTinyResponseDTO>(`${url}?token=${token}&formato=json&pagina=${page}`);
 
     if (resp.data.retorno.pedidos ) {
         const ids = resp.data.retorno.pedidos.map(prod => prod.pedido.id);
@@ -285,7 +279,6 @@ async truncateTable(){
 
       totalPages = resp.data.retorno.numero_paginas;
       page++;
-      console.log(page);
     } while (page <= totalPages);
 
     
@@ -301,4 +294,5 @@ async truncateTable(){
       return new HttpException('Erro ao buscar o pedido', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+
 }

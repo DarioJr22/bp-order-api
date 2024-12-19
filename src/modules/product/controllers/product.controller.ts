@@ -36,8 +36,6 @@ export class ProductController{
     @Get('product-update/:token')
     async updateStoreProducts(@Param('token') token:string){
       try {
-        console.log(token);
-        
         const resp = await this.tinyService.updateProductBase(token);
         return  resp
       } catch (error) {
@@ -73,7 +71,7 @@ export class ProductController{
 
     @Delete()
     async clearAll(){
-      return await this.tinyService.truncateTable()
+      return await this.tinyService.truncateOperationTable()
     }
 
 

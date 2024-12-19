@@ -19,6 +19,9 @@ import { ErpDataProcessor } from './services/erp-processor';
 import Redis from 'ioredis';
 import { Order } from './modules/order/entities/order.entity';
 import { OrderController } from './modules/order/controller/order.controller';
+import { User } from './modules/user/entity/user.entity';
+import { UserService } from './modules/user/services/user.service';
+import { TaskService } from './services/task.service';
 //import Redis from 'ioredis';
 
 dotenv.config()
@@ -36,7 +39,7 @@ dotenv.config()
       synchronize: true, // NÃO USE EM PRODUÇÃO! Sincroniza o banco automaticamente
     }),
     // Registrar as entidades específicas com TypeOrmModule.forFeature
-    TypeOrmModule.forFeature([Product, AnexoEntity,Order]),
+    TypeOrmModule.forFeature([Product, AnexoEntity,Order,User]),
     BullModule.forRoot({
       connection: new Redis(`${process.env.REDIS_URL}?family=0`,
         {
@@ -52,6 +55,15 @@ dotenv.config()
     ScheduleModule.forRoot()
   ],
   controllers: [AppController,ProductController, OrderController, ReportController,EmailController],
-  providers: [AppService,TinyService, OrderService, ReportService,EmailService, ProductService,ErpDataProcessor],
+  providers: [
+    AppService,
+    TinyService, 
+    OrderService, 
+    ReportService,
+    EmailService, 
+    ProductService,
+    ErpDataProcessor,
+    UserService,
+    TaskService]
 })
 export class AppModule {}

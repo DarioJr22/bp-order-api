@@ -6,6 +6,8 @@ import { ProductDto } from '../dto/product';
 import { Order } from 'src/modules/order/entities/order.entity';
 import { PedidoDetailDTO } from 'src/modules/order/dto/order';
 
+export const DEFAULT_PRODUCT_MARKETPLACE = "MERCADO LIVRE"
+
 @Injectable()
 export class ProductService {
   constructor(
@@ -33,32 +35,37 @@ export class ProductService {
       console.log(order);
       console.log(OrderData);
       order.id_item = item.item.id_produto
-      order.ecommerce_id = await this.returnNullIfIsUndefined(OrderData.ecommerce.id,OrderData)
-      order.ecommerce_nomeEcommerce = await this.returnNullIfIsUndefined(OrderData.ecommerce.nomeEcommerce,OrderData)
-      order.ecommerce_numeroPedidoCanalVenda = await this.returnNullIfIsUndefined(OrderData.numero_ordem_compra,OrderData)
+      order.ecommerce_id = await this.returnNullIfIsUndefined((OrderData.ecommerce.id || 0),OrderData)
+      order.ecommerce_nomeEcommerce = await this.returnNullIfIsUndefined(OrderData.ecommerce.nomeEcommerce || DEFAULT_PRODUCT_MARKETPLACE ,OrderData)
+      order.ecommerce_numeroPedidoCanalVenda = await this.returnNullIfIsUndefined(OrderData.numero_ordem_compra || 0,OrderData)
        // 2. Salva o produto no banco de dados
        const savedOrder = await this.orderRepository.save(order);
        return savedOrder
     })
      
    
-    return await savedItems;
+    return savedItems;
   }
 
   async returnNullIfIsUndefined(value:any,obj:PedidoDetailDTO){
-
     let returnValue = value ? value : null
+    
+    if(await this.verifyMarketPlaceInOtherPattern(obj)){
+      returnValue = obj.forma_envio
+    }
+    return returnValue
+  }
 
+  async verifyMarketPlaceInOtherPattern(obj:PedidoDetailDTO){
     if(
       obj.ecommerce.nomeEcommerce == undefined || 
       obj.ecommerce.nomeEcommerce == null || 
       obj.ecommerce.nomeEcommerce == ''  && 
       obj.forma_envio.includes("SHOPEE")   
     ){
-      returnValue = obj.forma_envio
+      return true
     }
-
-    return returnValue
+    return false
   }
 
   // Função para salvar o produto e anexos
@@ -134,7 +141,7 @@ export class ProductService {
 
 
   async putMarketPlacesOnProducts(){
-    (await this.orderRepository.find()).map(
+    (await this.orderRepository.find()).forEach(
       (order) => this.productRepository.update(
         {id:order.id_item},
         {marketplace:order.ecommerce_nomeEcommerce}
