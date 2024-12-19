@@ -72,7 +72,7 @@ export class ProductController{
 
     @Delete()
     async clearAll(){
-      return await this.productService.truncateTablesDS()
+      return await this.productService.truncateTablesWithQueryRunner()
     }
 
 
