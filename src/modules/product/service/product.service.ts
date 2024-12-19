@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import { AnexoEntity, Product } from '../entities/product.entity';
 import { ProductDto } from '../dto/product';
 import { Order } from 'src/modules/order/entities/order.entity';
@@ -19,6 +19,8 @@ export class ProductService {
     
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+
+    private dataSource:DataSource
   ) {}
 
 
@@ -106,6 +108,31 @@ export class ProductService {
     
   }
 
+
+  async truncateTablesDS(): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    try {
+      // Begin transaction
+      await queryRunner.startTransaction();
+
+      // Use raw SQL to truncate with cascade
+      await queryRunner.query(`TRUNCATE TABLE anexo CASCADE;`);
+      await queryRunner.query(`TRUNCATE TABLE produto CASCADE;`);
+      await queryRunner.query(`TRUNCATE TABLE "order" CASCADE;`);
+
+      // Commit the transaction
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      // Rollback the transaction in case of error
+      await queryRunner.rollbackTransaction();
+      console.error('Error truncating tables:', error);
+    } finally {
+      // Release the query runner
+      await queryRunner.release();
+    }
+  }
   
 
 

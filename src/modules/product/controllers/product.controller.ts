@@ -7,9 +7,10 @@ import { SearchProductDto } from "../dto/searchProduct";
 @Controller('product')
 export class ProductController{
     
-    constructor(private tinyService:TinyService,
-      private productService:ProductService
-    ){}
+    constructor(
+        private tinyService:TinyService,
+        private productService:ProductService
+      ){}
     
     @Get()
     async getAllProducts(){
@@ -71,7 +72,7 @@ export class ProductController{
 
     @Delete()
     async clearAll(){
-      return await this.tinyService.truncateOperationTable()
+      return await this.productService.truncateTablesDS()
     }
 
 
