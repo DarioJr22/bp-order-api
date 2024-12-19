@@ -109,7 +109,7 @@ export class ProductService {
   }
 
 
-  async truncateTablesDS(): Promise<void> {
+  async truncateTablesWithQueryRunner(): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
