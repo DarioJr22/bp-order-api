@@ -43,7 +43,7 @@ export class ProductService {
        // 2. Salva o produto no banco de dados
        const savedOrder = await this.orderRepository.save(order);
        return savedOrder
-    })
+    })  
      
    
     return savedItems;

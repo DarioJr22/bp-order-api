@@ -17,6 +17,9 @@ export class Product {
   id: string;
 
   @Column({ nullable: true })
+  id_item:string
+
+  @Column({ nullable: true })
   nome: string;
 
   @Column({ nullable: true })
