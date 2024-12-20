@@ -76,6 +76,7 @@ export class ProductService {
     // 1. Cria uma nova instância de Product com os dados recebidos
     const product = new Product();
     Object.assign(product,productData);
+    product.id_item = productData.id;
     product.empresa = empresa;
 
     // 2. Salva o produto no banco de dados
