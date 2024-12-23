@@ -171,7 +171,7 @@ export class ProductService {
   async putMarketPlacesOnProducts(){
     (await this.orderRepository.find()).forEach(
       (order) => this.productRepository.update(
-        {id:order.id_item},
+        {id_item:order.id_item},
         {marketplace:order.ecommerce_nomeEcommerce}
       )
     )

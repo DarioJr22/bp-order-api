@@ -15,7 +15,7 @@ export class TaskService{
         
     }
     
-    @Cron("06 20 * * *")
+    //@Cron("06 20 * * *")
     async updateUsersData(){
         this.productService.truncateTablesWithQueryRunner()
         const users = await this.UserService.getUsers();
