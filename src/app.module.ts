@@ -55,7 +55,7 @@ dotenv.config()
     BullModule.registerQueue({
       name: 'erp-data-queue', // Nome da fila que será utilizada
     }),
-    ScheduleModule.forRoot()
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController,ProductController, OrderController, ReportController,EmailController,UserController],
   providers: [

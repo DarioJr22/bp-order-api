@@ -44,7 +44,7 @@ export class ProductService {
       console.log(order);
       console.log(OrderData);
       order.id_item = item.item.id_produto
-      order.ecommerce_id = await this.returnNullIfIsUndefined((OrderData.ecommerce.id || 0),OrderData)
+  /*     order.ecommerce_id = await this.returnNullIfIsUndefined(( OrderData.ecommerce.id ?  OrderData.ecommerce.id : 0),OrderData) */
       order.ecommerce_nomeEcommerce = await this.returnNullIfIsUndefined(OrderData.ecommerce.nomeEcommerce || DEFAULT_PRODUCT_MARKETPLACE ,OrderData)
       order.ecommerce_numeroPedidoCanalVenda = await this.returnNullIfIsUndefined(OrderData.numero_ordem_compra || 0,OrderData)
        // 2. Salva o produto no banco de dados
