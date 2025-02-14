@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { StoreSource } from '../dto/store';
+import { User } from 'src/modules/user/entity/user.entity';
 
 @Entity('order')
 export class Order {
@@ -120,5 +122,20 @@ export class Order {
   // Intermediador
   @Column({ type: 'jsonb', nullable: true })
   intermediador: any;
+
+  //Fonte de dados do pedido 
+  @Column({type:'enum',enum:StoreSource,default:StoreSource.TINY})
+  source:StoreSource
+
+  @ManyToOne(() => User, (User) => User.orders)
+  User: User;
+
+  
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  data_criacao: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  data_atualizacao: Date;
+
 
 }

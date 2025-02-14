@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Like, Repository } from 'typeorm';
 import { AnexoEntity, Product } from '../entities/product.entity';
 import { ProductDto } from '../dto/product';
-import { Order } from 'src/modules/order/entities/order.entity';
+import { Order } from 'src/modules/order/entity/order.entity';
 import { PedidoDetailDTO } from 'src/modules/order/dto/order';
 
 export const DEFAULT_PRODUCT_MARKETPLACE = "MERCADO LIVRE"
@@ -23,6 +23,13 @@ export class ProductService {
     private dataSource:DataSource
   ) {}
 
+
+
+   async encontrarPorId(id: string): Promise<Product> {
+      const produto = await this.productRepository.findOne({ where: { id } });
+      if (!produto) throw new NotFoundException('Produto não encontrado');
+      return produto;
+    }
 
   async saveOrderFromExternalSystem(
     OrderData: PedidoDetailDTO

@@ -44,11 +44,11 @@ export class ErpDataProcessor extends WorkerHost {
 
     //If the product queue if finished start to get the order base.
     //If the order quee is finished, put the marketplaces on products.
-    if(this.QUEUE_DATA.entity == EntityOperation.PRODUCT){
+    /* if(this.QUEUE_DATA.entity == EntityOperation.PRODUCT){
       this.tinyService.updateOrderBase(this.QUEUE_DATA.token)
     }else if(this.QUEUE_DATA.entity == EntityOperation.ORDER){
       this.productService.putMarketPlacesOnProducts()
-    }
+    } */
   }
 
   async process(job: Job<{ id: string ,token:string,entity:EntityOperation}>): Promise<void> {

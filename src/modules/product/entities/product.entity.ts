@@ -7,8 +7,8 @@ import {
   JoinColumn,
   
 } from 'typeorm';
-
-/* TODO - Criar coluna específica pra saldo de estoque */
+import { ProdutoStatus } from '../dto/product-pricing-status';
+import { LogAcess } from '../../logAcess/entity/logacesso.entity';
 
 // Entidade Product, associada à tabela 'produto'
 @Entity('produto')
@@ -187,8 +187,35 @@ export class Product {
   @Column({nullable:true})
   marketplace:string;
 
+  //Precificação customizada
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  preco_venda: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  margem_contribuicao: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  lucro_liquido: number;
+
+  @Column({ type: 'boolean', default: false })
+  em_promocao: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: ProdutoStatus,
+    default: ProdutoStatus.ATENCAO,
+  })
+  status_precificacao: ProdutoStatus;
+
+  @Column({ type: 'timestamp', nullable: true })
+  data_prec: Date; // Data da última precificação
+
+  @OneToMany(() => LogAcess,(log) => log.product)
+  logs:LogAcess;
 }
+
+
 
 
 

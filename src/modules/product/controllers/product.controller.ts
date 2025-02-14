@@ -3,14 +3,29 @@ import { TinyService } from "src/services/tiny.service";
 
 import { ProductService } from "../service/product.service";
 import { SearchProductDto } from "../dto/searchProduct";
+import { TaskService } from "src/services/task.service";
 
 @Controller('product')
 export class ProductController{
     
     constructor(
         private tinyService:TinyService,
-        private productService:ProductService
+        private productService:ProductService,
+        private taskServic:TaskService
       ){}
+
+
+       
+    @Get('update-admin-products')
+    async updateUsersData(){
+        try {
+            const resp = await this.taskServic.updateUsersData();
+            return  resp
+          } catch (error) {
+            console.log(error);
+            throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
+          }
+    }
     
     @Get()
     async getAllProducts(){

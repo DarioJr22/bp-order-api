@@ -1,4 +1,8 @@
-import { Column, Entity,  PrimaryGeneratedColumn } from "typeorm";
+import { Address } from "src/modules/address/address.entity";
+import { Order } from "src/modules/order/entity/order.entity";
+import { LogAcess } from "src/modules/logAcess/entity/logacesso.entity";
+import { Column, Entity,  OneToMany,  PrimaryGeneratedColumn } from "typeorm";
+import { Role } from "./role";
 
 
 @Entity('user')
@@ -19,5 +23,22 @@ export class User {
     @Column({nullable:true})
     password:string;
 
-    
+    @OneToMany(() => LogAcess,(log) => log.user)
+    logs:LogAcess;
+
+    @OneToMany(() => Address, (address) => address.user)
+    address: Address[];
+
+    @OneToMany(() => Order, (Order) => Order)
+    orders: Order[];
+
+    @Column({
+        type: 'enum',
+        enum: Role,
+        default: Role.CLIENT,
+      })
+      role: Role;
+
+    @Column({nullable:true})
+    data_atualizacao:Date
 }

@@ -197,6 +197,7 @@ export class TinyService {
       );
 
       if (resp.data.retorno.produtos) {
+        console.log(productIds)
         const ids = resp.data.retorno.produtos.map(prod => prod.produto.id);
         productIds = productIds.concat(ids);
       }

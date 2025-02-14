@@ -19,8 +19,10 @@ export class TaskService{
     async updateUsersData(){
         this.productService.truncateTablesWithQueryRunner()
         const users = await this.UserService.getUsers();
-        for(const user of users)
-            this.TinyService.updateProductBase(user.token)
-        
+        for(const user of users){
+            if(user.token){
+                this.TinyService.updateProductBase(user.token)
+            }
+        }  
     }
 }

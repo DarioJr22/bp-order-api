@@ -17,11 +17,14 @@ import { AnexoEntity, Product } from './modules/product/entities/product.entity'
 import { BullModule } from '@nestjs/bullmq';
 import { ErpDataProcessor } from './services/erp-processor';
 import Redis from 'ioredis';
-import { Order } from './modules/order/entities/order.entity';
+import { Order } from './modules/order/entity/order.entity';
 import { OrderController } from './modules/order/controller/order.controller';
 import { User } from './modules/user/entity/user.entity';
 import { UserService } from './modules/user/services/user.service';
 import { TaskService } from './services/task.service';
+import { Address } from './modules/address/address.entity';
+import { LogAcess } from './modules/logAcess/entity/logacesso.entity';
+import { UserController } from './modules/user/controller/user.controller';
 //import Redis from 'ioredis';
 
 dotenv.config()
@@ -31,7 +34,7 @@ dotenv.config()
     TypeOrmModule.forRoot({
       type: 'postgres', // Tipo de banco de dados
       host: process.env.PGHOST,
-      port: 5432,
+      port: 10053,
       username:  process.env.PGUSER,
       password:  process.env.PGPASSWORD,
       database:  process.env.PGDATABASE,
@@ -39,7 +42,7 @@ dotenv.config()
       synchronize: true, // NÃO USE EM PRODUÇÃO! Sincroniza o banco automaticamente
     }),
     // Registrar as entidades específicas com TypeOrmModule.forFeature
-    TypeOrmModule.forFeature([Product, AnexoEntity,Order,User]),
+    TypeOrmModule.forFeature([Product, AnexoEntity,Order,Address,LogAcess,User]),
     BullModule.forRoot({
       connection: new Redis(`${process.env.REDIS_URL}?family=0`,
         {
@@ -54,7 +57,7 @@ dotenv.config()
     }),
     ScheduleModule.forRoot()
   ],
-  controllers: [AppController,ProductController, OrderController, ReportController,EmailController],
+  controllers: [AppController,ProductController, OrderController, ReportController,EmailController,UserController],
   providers: [
     AppService,
     TinyService, 
@@ -64,6 +67,7 @@ dotenv.config()
     ProductService,
     ErpDataProcessor,
     UserService,
-    TaskService]
+    TaskService,
+    ]
 })
 export class AppModule {}
