@@ -23,6 +23,8 @@ export class User {
     @Column({nullable:true,unique:true})
     email:string;
 
+    @Column({nullable:true})
+    profilePicture:string;
 
     @Column({nullable:true})
     password:string;
@@ -32,6 +34,7 @@ export class User {
 
     @OneToMany(() => Address, (address) => address.user)
     address: Address[];
+
 
     @OneToMany(() => Order, (Order) => Order)
     orders: Order[];

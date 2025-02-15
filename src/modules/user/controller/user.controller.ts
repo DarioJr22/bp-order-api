@@ -7,6 +7,7 @@ import {
     Param,
     Put,
     Delete,
+    Query,
   } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { CreateUsuarioDto } from '../dto/create-user.dto';
@@ -25,6 +26,9 @@ import { ValidateUserDto } from '../dto/validate-user.dto';
     @Post('valid-user')
     async validarUsuario(@Body() validateUser:ValidateUserDto){
         const user = await this.usuarioService.encontrarPorEmail(validateUser.email)
+        console.log(user)
+        console.log(validateUser);
+        
             if(user.password == validateUser.password){
                 return {
                     usuarioValido:true,
@@ -39,8 +43,11 @@ import { ValidateUserDto } from '../dto/validate-user.dto';
     }
   
     @Get()
-    async listarTodos() {
-      return this.usuarioService.encontrarTodos();
+    async findAll(
+      @Query('page') page: number = 1,
+      @Query('limit') limit: number = 10,
+    ) {
+      return this.usuarioService.findAllPaged(page, limit);
     }
   
     @Get(':id')

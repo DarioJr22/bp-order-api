@@ -83,6 +83,15 @@ export class UserService{
     await this.userRepository.remove(usuario);
   }
 
+ async findAllPaged(page:number = 1, limit:number = 10){
+    const [data, count] = await this.userRepository.findAndCount({
+      take:limit,
+      skip:(page - 1)*limit
+    })
+
+    return {data, count};
+  }
+
 
   async calcularEngajamentoPorPeriodo(
     usuarioId: string,
