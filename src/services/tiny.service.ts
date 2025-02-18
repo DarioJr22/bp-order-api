@@ -21,7 +21,8 @@ export class TinyService {
 
   private readonly limiter: Bottleneck;
 
-  constructor(private readonly productService: ProductService,
+  constructor(
+    private readonly productService: ProductService,
     @InjectQueue('erp-data-queue') private readonly erpDataQueue: Queue,
   ) {
     this.limiter = new Bottleneck({
@@ -186,7 +187,9 @@ export class TinyService {
     return paramsHandler
   }
 
-  async getAllProductIdsByToken(token:string): Promise<string[]> {
+
+
+  async getNewProductIdsByToken(token:string): Promise<string[]> {
     let productIds: string[] = [];
     let page = 1;
     let totalPages = 1;
@@ -198,8 +201,13 @@ export class TinyService {
 
       if (resp.data.retorno.produtos) {
         console.log(productIds)
-        const ids = resp.data.retorno.produtos.map(prod => prod.produto.id);
-        productIds = productIds.concat(ids);
+        for (const prod of resp.data.retorno.produtos) {
+          const exists = await this.productService.isProductInDatabase(prod.produto.id,prod.produto.codigo);
+          if (!exists ) {
+            console.log("Será adicionado " + prod.produto.id); // Log do ID que será adicionado
+            productIds.push(prod.produto.id); // Adiciona o ID ao array
+          }
+        }
       }
 
       totalPages = resp.data.retorno.numero_paginas;
@@ -209,11 +217,12 @@ export class TinyService {
     return productIds;
   }
 
+
+  
 async updateProductBase(token:string) {
     //Recupera os ID's de todos os produtos
-    const productIds = await this.getAllProductIdsByToken(token);
-    console.log('Passou pra update na base');
-
+    const productIds = await this.getNewProductIdsByToken(token);
+    console.log('produtos att' + productIds)
     //Pesquisa e salva cada um dos produtos usando a fila
     for (const id of productIds) {
       await this.erpDataQueue.add('fetch-and-save-product', 

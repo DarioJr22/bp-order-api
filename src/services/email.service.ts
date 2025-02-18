@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
 import { EmailOrder } from 'src/modules/order/dto/order';
+import { Product } from 'src/modules/product/entities/product.entity';
 // Carrega as variáveis do .env
 dotenv.config();
 
@@ -167,6 +168,125 @@ export class EmailService{
         </body>
         </html>
         `;
+    }
+
+
+    generateEntLoadProducts(totalProducts:number , loadDate:Date = new Date(),products:Product[]){
+
+        let productsHtml = '';
+    
+        products.forEach((product) => {
+          productsHtml += `
+            <tr>
+              <td>${product.nome}</td>
+              <td>${product.codigo}</td>
+              <td>R$ ${product.preco.toFixed(2)}</td>
+            </tr>`;
+        });
+        return `
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="X-UA-Compatible" content="ie=edge">
+            <title>Produtos Carregados na Loja</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f9;
+                    color: #333;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .container {
+                    background-color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+                    max-width: 600px;
+                    margin: auto;
+                }
+                h1 {
+                    color: #e63946;
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .order-details {
+                    margin-bottom: 20px;
+                }
+                .order-details h2 {
+                    color: #457b9d;
+                    border-bottom: 2px solid #e63946;
+                    padding-bottom: 5px;
+                }
+                .products-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                }
+                .products-table th, .products-table td {
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    text-align: left;
+                }
+                .products-table th {
+                    background-color: #457b9d;
+                    color: white;
+                }
+                .products-table td {
+                    background-color: #f1faee;
+                }
+                .total-price {
+                    text-align: right;
+                    font-size: 1.2em;
+                    font-weight: bold;
+                    color: #e63946;
+                }
+                .footer {
+                    text-align: center;
+                    color: #a8a8a8;
+                    margin-top: 20px;
+                }
+                .footer a {
+                    color: #457b9d;
+                    text-decoration: none;
+                }
+                .footer a:hover {
+                    text-decoration: underline;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Produtos Carregados na Loja !</h1>
+
+                <div class="order-details">
+                    <h2>Detalhes dos Produtos</h2>
+                    <p><strong>Total de Produtos Carregados:</strong> ${totalProducts}</p>
+                    <p><strong>Data do Carregamento:</strong> ${loadDate}</p>
+                </div>
+
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Nome do Produto</th>
+                            <th>Código</th>
+                            <th>Preço Unitário</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${productsHtml}
+                    </tbody>
+                </table>
+
+                <div class="footer">
+                    <p>Obrigado por escolher nossa loja!</p>
+                    <p>Visite nosso site: <a href="https://seusite.com">seusite.com</a></p>
+                </div>
+            </div>
+        </body>
+        </html>`;
     }
     
 }

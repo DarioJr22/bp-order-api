@@ -6,6 +6,9 @@ import Bottleneck from 'bottleneck';
 import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ProductService } from 'src/modules/product/service/product.service';
 import { EntityOperation } from 'src/shared/constants/entity-operation';
+import { BehaviorSubject } from 'rxjs';
+import { Product } from 'src/modules/product/entities/product.entity';
+import { EmailService } from './email.service';
 
 export interface QueueDataProcessor {
   id:string
@@ -18,14 +21,15 @@ export class ErpDataProcessor extends WorkerHost {
   private readonly limiter: Bottleneck;
   QUEUE_DATA:QueueDataProcessor = {
     id:'',
-  token:''
+    token:''
   }
-
   ENTITY_OPERATION = ''
-  private 
+  
   constructor(
     private readonly productService: ProductService,
     private readonly tinyService: TinyService,
+    private readonly emailService: EmailService,
+
     @InjectQueue('erp-data-queue') private readonly erpDataQueue: Queue,
   ) {
     super();
@@ -39,14 +43,32 @@ export class ErpDataProcessor extends WorkerHost {
   }
 
   @OnWorkerEvent('drained')
-  onDrained(){
+  async onDrained(){
    // this.logger.log(`Queue id ${job.data.id}`)
 
     //If the product queue if finished start to get the order base.
     //If the order quee is finished, put the marketplaces on products.
-    /* if(this.QUEUE_DATA.entity == EntityOperation.PRODUCT){
-      this.tinyService.updateOrderBase(this.QUEUE_DATA.token)
-    }else if(this.QUEUE_DATA.entity == EntityOperation.ORDER){
+    if(this.QUEUE_DATA.entity == EntityOperation.PRODUCT){
+      this.logger.log(this.productService.savedProducts.value)
+      this.logger.log('Enviado para o email:', this.productService.clientEmail.value)
+      
+      const products = this.productService.savedProducts.value
+      
+      const emailHtml = await this.emailService.generateEntLoadProducts(
+        [...products].length,
+        new Date,
+        products
+      );
+
+      const result = await this.emailService.sendMail(
+        this.productService.clientEmail.value, 
+        'Carregamento de produtos finalizado - Bravan Parts', 
+        `Foram ${products.length} carregados`,
+        emailHtml
+      )
+    }
+    
+    /* else if(this.QUEUE_DATA.entity == EntityOperation.ORDER){
       this.productService.putMarketPlacesOnProducts()
     } */
   }
@@ -95,15 +117,26 @@ export class ErpDataProcessor extends WorkerHost {
       const productData = await this.limiter.schedule(() =>
         this.tinyService.findProductById(productId,token),
       );
-
+      
       const companyInfo = await this.tinyService.findCompanyInfo(token)
 
       if (!(productData instanceof HttpException)) {
-        await this.productService.saveProductFromExternalSystem(
-          productData.retorno.produto,
-          companyInfo.retorno.conta.razao_social
-        );
-        this.logger.log(`Produto ${productId} processado com sucesso.`);
+        
+        const skuAndSupplierSkuIsNull = (
+          (productData.retorno.produto.codigo == '' || productData.retorno.produto.codigo == null ) && 
+          (productData.retorno.produto.codigo_pelo_fornecedor == '' || productData.retorno.produto.codigo_pelo_fornecedor == null)
+        )
+
+        if(skuAndSupplierSkuIsNull){
+          this.logger.log(`Produto ${productId} não pode ser processado. Todos os códigos estão vazios.`);
+          throw new Error(`Produto ${productId} não pode ser processado. Todos os códigos estão vazios.`)
+        }else{
+          await this.productService.saveProductFromExternalSystem(
+            productData.retorno.produto,
+            companyInfo.retorno.conta.razao_social
+          );
+          this.logger.log(`Produto ${productId} processado com sucesso.`);
+        }
       } else {
         this.logger.error(
           `Erro ao buscar o produto ${productId}: ${productData.message}`,

@@ -5,11 +5,19 @@ import { AnexoEntity, Product } from '../entities/product.entity';
 import { ProductDto } from '../dto/product';
 import { Order } from 'src/modules/order/entity/order.entity';
 import { PedidoDetailDTO } from 'src/modules/order/dto/order';
+import { UserService } from 'src/modules/user/services/user.service';
+import { TinyService } from 'src/services/tiny.service';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export const DEFAULT_PRODUCT_MARKETPLACE = "MERCADO LIVRE"
 
 @Injectable()
 export class ProductService {
+
+  public savedProducts:BehaviorSubject<Product[]> = new BehaviorSubject([]);
+  public savedProductsObs$:Observable<any> = this.savedProducts.asObservable();
+  public clientEmail:BehaviorSubject<string> = new BehaviorSubject('')
+
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
@@ -20,10 +28,16 @@ export class ProductService {
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
 
+    private readonly userService:UserService,
+
     private dataSource:DataSource
   ) {}
 
-
+  
+  async isProductInDatabase(productId: string,codigo:string): Promise<boolean> {
+    const product = await this.productRepository.findOne({ where: { id_item: productId.toString() ,codigo:codigo } });    
+    return !!product; // Retorna true se o produto existir, false caso contrário
+  }
 
    async encontrarPorId(id: string): Promise<Product> {
       const produto = await this.productRepository.findOne({ where: { id } });
@@ -85,6 +99,7 @@ export class ProductService {
     Object.assign(product,productData);
     product.id_item = productData.id;
     product.empresa = empresa;
+    product.codigo = !product.codigo && product.codigo_pelo_fornecedor ? product.codigo_pelo_fornecedor : product.codigo  
 
     // 2. Salva o produto no banco de dados
     const savedProduct = await this.productRepository.save(product);
@@ -100,9 +115,7 @@ export class ProductService {
       }
     }
 
-    console.log('Salvou o produto ', savedProduct);
-    
-
+    this.savedProducts.next([...this.savedProducts.value,savedProduct])
     return savedProduct;
   }
 
@@ -183,6 +196,8 @@ export class ProductService {
       )
     )
   }
+
+  
 
 
 }

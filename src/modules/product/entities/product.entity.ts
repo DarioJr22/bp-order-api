@@ -7,7 +7,7 @@ import {
   JoinColumn,
   
 } from 'typeorm';
-import { ProdutoStatus } from '../dto/product-pricing-status';
+import { ProducPricing, ProdutoStatus } from '../dto/product-pricing-status';
 import { LogAcess } from '../../logAcess/entity/logacesso.entity';
 
 // Entidade Product, associada à tabela 'produto'
@@ -22,7 +22,7 @@ export class Product {
   @Column({ nullable: true })
   nome: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false, unique:true })
   codigo: string;
 
   @Column({ nullable: true })
@@ -188,16 +188,6 @@ export class Product {
   marketplace:string;
 
   //Precificação customizada
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  preco_venda: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  margem_contribuicao: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  lucro_liquido: number;
-
   @Column({ type: 'boolean', default: false })
   em_promocao: boolean;
 
@@ -213,6 +203,9 @@ export class Product {
 
   @OneToMany(() => LogAcess,(log) => log.product)
   logs:LogAcess;
+
+  @Column('simple-json', { nullable: true })
+  preco_marketplace: ProducPricing[];
 }
 
 

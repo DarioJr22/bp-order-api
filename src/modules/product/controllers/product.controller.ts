@@ -1,4 +1,4 @@
-import {  Controller, Delete, Get, HttpException, HttpStatus, Logger, Param, Query } from "@nestjs/common";
+import {  Body, Controller, Delete, Get, HttpException, HttpStatus, Logger, Param, Query } from "@nestjs/common";
 import { TinyService } from "src/services/tiny.service";
 
 import { ProductService } from "../service/product.service";
@@ -15,18 +15,20 @@ export class ProductController{
       ){}
 
 
-       
-    @Get('update-admin-products')
-    async updateUsersData(){
-        try {
-            const resp = await this.taskServic.updateUsersData();
-            return  resp
-          } catch (error) {
-            console.log(error);
-            throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
-          }
-    }
-    
+
+
+    @Get('update-admin-products/:email')
+    async updateUsersData(@Param('email') emailClient:string){
+      try {
+          this.productService.clientEmail.next(emailClient)
+          const resp = await this.taskServic.updateUsersData();
+
+          return  resp
+        } catch (error) {
+          console.log(error);
+          throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+  }
     @Get()
     async getAllProducts(){
         try {
