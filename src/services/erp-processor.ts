@@ -50,6 +50,7 @@ export class ErpDataProcessor extends WorkerHost {
     //If the order quee is finished, put the marketplaces on products.
     if(this.QUEUE_DATA.entity == EntityOperation.PRODUCT){
       this.logger.log(this.productService.savedProducts.value)
+      //TODO email do usuário logado
       this.logger.log('Enviado para o email:', this.productService.clientEmail.value)
       
       const products = this.productService.savedProducts.value
@@ -61,7 +62,7 @@ export class ErpDataProcessor extends WorkerHost {
       );
 
       const result = await this.emailService.sendMail(
-        this.productService.clientEmail.value, 
+       'executivo@bravanparts.com', 
         'Carregamento de produtos finalizado - Bravan Parts', 
         `Foram ${products.length} carregados`,
         emailHtml

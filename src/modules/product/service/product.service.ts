@@ -8,7 +8,7 @@ import { PedidoDetailDTO } from 'src/modules/order/dto/order';
 import { UserService } from 'src/modules/user/services/user.service';
 import { TinyService } from 'src/services/tiny.service';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ProducPricing } from '../dto/product-pricing-status';
+import { DEFAULT_MARKET_PLACES, ProducPricing } from '../dto/product-pricing-status';
 
 export const DEFAULT_PRODUCT_MARKETPLACE = "MERCADO LIVRE"
 
@@ -102,7 +102,7 @@ export class ProductService {
     product.id_item = productData.id;
     product.empresa = empresa;
     product.codigo = !product.codigo && product.codigo_pelo_fornecedor ? product.codigo_pelo_fornecedor : product.codigo  
-
+    product.preco_marketplace = DEFAULT_MARKET_PLACES
     // 2. Salva o produto no banco de dados
     const savedProduct = await this.productRepository.save(product);
 
