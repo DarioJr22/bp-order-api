@@ -219,9 +219,11 @@ export class TinyService {
 
 
   
-async updateProductBase(token:string) {
+async updateProductBase(token:string,email:string) {
     //Recupera os ID's de todos os produtos
+    this.productService.clientEmail.next(email)
     const productIds = await this.getNewProductIdsByToken(token);
+
     console.log('produtos att' + productIds)
     //Pesquisa e salva cada um dos produtos usando a fila
     for (const id of productIds) {

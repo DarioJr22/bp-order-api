@@ -8,6 +8,7 @@ import { PedidoDetailDTO } from 'src/modules/order/dto/order';
 import { UserService } from 'src/modules/user/services/user.service';
 import { TinyService } from 'src/services/tiny.service';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { ProducPricing } from '../dto/product-pricing-status';
 
 export const DEFAULT_PRODUCT_MARKETPLACE = "MERCADO LIVRE"
 
@@ -17,6 +18,7 @@ export class ProductService {
   public savedProducts:BehaviorSubject<Product[]> = new BehaviorSubject([]);
   public savedProductsObs$:Observable<any> = this.savedProducts.asObservable();
   public clientEmail:BehaviorSubject<string> = new BehaviorSubject('')
+  public clientEmail$:Observable<any> = this.savedProducts.asObservable();
 
   constructor(
     @InjectRepository(Product)
@@ -195,6 +197,10 @@ export class ProductService {
         {marketplace:order.ecommerce_nomeEcommerce}
       )
     )
+  }
+
+  async productUpdatePrice(codigo:string,preco:ProducPricing[]){
+   await this.productRepository.update({codigo:codigo},{preco_marketplace:preco})
   }
 
   

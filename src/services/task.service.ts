@@ -16,11 +16,11 @@ export class TaskService{
     }
     
     //@Cron("06 20 * * *")
-    async updateUsersData(){
+    async updateUsersData(email:string){
         const users = await this.UserService.getUsers();
         for(const user of users){
             if(user.token){
-                this.TinyService.updateProductBase(user.token)
+                this.TinyService.updateProductBase(user.token,email)
             }
         }  
     }

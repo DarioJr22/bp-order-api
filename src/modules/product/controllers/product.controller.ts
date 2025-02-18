@@ -1,9 +1,10 @@
-import {  Body, Controller, Delete, Get, HttpException, HttpStatus, Logger, Param, Query } from "@nestjs/common";
+import {  Body, Controller, Delete, Get, HttpException, HttpStatus, Logger, Param, Put, Query } from "@nestjs/common";
 import { TinyService } from "src/services/tiny.service";
 
 import { ProductService } from "../service/product.service";
 import { SearchProductDto } from "../dto/searchProduct";
 import { TaskService } from "src/services/task.service";
+import { ProducPricing } from "../dto/product-pricing-status";
 
 @Controller('product')
 export class ProductController{
@@ -15,13 +16,22 @@ export class ProductController{
       ){}
 
 
+    
+    @Put('update-product')
+    async updateProductPrice(@Body() productpricing:{
+      codigo:string,
+      preco:ProducPricing[]
+    }){
 
+     this.productService.productUpdatePrice(productpricing.codigo,productpricing.preco)
+
+    }
 
     @Get('update-admin-products/:email')
-    async updateUsersData(@Param('email') emailClient:string){
+    async updateUsersData(@Param('email') email:string){
       try {
-          this.productService.clientEmail.next(emailClient)
-          const resp = await this.taskServic.updateUsersData();
+         
+          const resp = await this.taskServic.updateUsersData(email);
 
           return  resp
         } catch (error) {
@@ -49,31 +59,8 @@ export class ProductController{
             console.log(error);
             throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
           }
-    }
+    } 
 
-    @Get('product-update/:token')
-    async updateStoreProducts(@Param('token') token:string){
-      try {
-        const resp = await this.tinyService.updateProductBase(token);
-        return  resp
-      } catch (error) {
-        console.log(error);
-        throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
-
-    @Get('order-update/:token')
-    async updateStoreOrder(@Param('token') token:string){
-      try {
-        console.log(token);
-        const resp = await this.tinyService.updateOrderBase(token);
-        return  resp
-      } catch (error) {
-        console.log(error);
-        Logger.log(token)
-        throw new HttpException('Erro ao buscar Pedidos: ' + error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
 
 
     @Get('update-marketplaces')
