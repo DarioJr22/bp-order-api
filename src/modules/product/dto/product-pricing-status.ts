@@ -12,6 +12,8 @@ export class ProducPricing{
     preco_venda: number;
     margem_contribuicao: number;
     lucro_liquido: number;
+    data_precificacao: Date;
+    status:ProdutoStatus
 }
 
 
@@ -22,7 +24,9 @@ export const DEFAULT_MARKET_PLACES:ProducPricing[] = [{
   "preco_venda": 0,
   "preco_custo":0,
   "margem_contribuicao": 0,
-  "lucro_liquido": 0
+  "lucro_liquido": 0,
+  "data_precificacao":new Date(),
+  "status":ProdutoStatus.ATENCAO
 },
 {
   "marketplace":"Mercado Livre Premium",
@@ -30,4 +34,7 @@ export const DEFAULT_MARKET_PLACES:ProducPricing[] = [{
   "preco_venda": 0,
   "preco_custo":0,
   "margem_contribuicao": 0,
-  "lucro_liquido": 0}]
+  "lucro_liquido": 0,
+  "data_precificacao":new Date(),
+  "status":ProdutoStatus.ATENCAO,
+}]

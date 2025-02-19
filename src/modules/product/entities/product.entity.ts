@@ -196,11 +196,7 @@ export class Product {
     enum: ProdutoStatus,
     default: ProdutoStatus.ATENCAO,
   })
-  status_precificacao: ProdutoStatus;
-
-  @Column({ type: 'timestamp', nullable: true })
-  data_prec: Date; // Data da última precificação
-
+  
   @OneToMany(() => LogAcess,(log) => log.product)
   logs:LogAcess;
 

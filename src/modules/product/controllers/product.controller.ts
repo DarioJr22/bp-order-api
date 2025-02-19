@@ -4,7 +4,7 @@ import { TinyService } from "src/services/tiny.service";
 import { ProductService } from "../service/product.service";
 import { SearchProductDto } from "../dto/searchProduct";
 import { TaskService } from "src/services/task.service";
-import { ProducPricing } from "../dto/product-pricing-status";
+import { ProducPricing, ProdutoStatus } from "../dto/product-pricing-status";
 
 @Controller('product')
 export class ProductController{
@@ -20,10 +20,12 @@ export class ProductController{
     @Put('update-product')
     async updateProductPrice(@Body() productpricing:{
       codigo:string,
-      preco:ProducPricing[]
+      preco:ProducPricing[],
     }){
 
-     this.productService.productUpdatePrice(productpricing.codigo,productpricing.preco)
+     this.productService.productUpdatePrice(
+      productpricing.codigo,
+      productpricing.preco)
 
     }
 

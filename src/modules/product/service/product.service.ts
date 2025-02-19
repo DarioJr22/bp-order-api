@@ -8,7 +8,7 @@ import { PedidoDetailDTO } from 'src/modules/order/dto/order';
 import { UserService } from 'src/modules/user/services/user.service';
 import { TinyService } from 'src/services/tiny.service';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { DEFAULT_MARKET_PLACES, ProducPricing } from '../dto/product-pricing-status';
+import { DEFAULT_MARKET_PLACES, ProducPricing, ProdutoStatus } from '../dto/product-pricing-status';
 
 export const DEFAULT_PRODUCT_MARKETPLACE = "MERCADO LIVRE"
 
@@ -203,8 +203,14 @@ export class ProductService {
     )
   }
 
-  async productUpdatePrice(codigo:string,preco:ProducPricing[]){
-   await this.productRepository.update({codigo:codigo},{preco_marketplace:preco})
+  async productUpdatePrice(
+    codigo:string,
+    preco:ProducPricing[]){
+   await this.productRepository.update(
+    {codigo:codigo},
+    {
+      preco_marketplace:preco
+    })
   }
 
   
