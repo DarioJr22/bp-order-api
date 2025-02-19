@@ -121,6 +121,10 @@ export class ProductService {
     return savedProduct;
   }
 
+  async getProductById(id:string){
+    return this.productRepository.findBy({id:id})
+  }
+
 
 
 

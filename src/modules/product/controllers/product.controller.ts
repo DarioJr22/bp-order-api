@@ -81,7 +81,7 @@ export class ProductController{
 
 
     @Get(':id')
-    async getProductsByID(@Param('id') id:string,@Param('store') token:'bravan' | 'planet'){
+    async getProductsFromTyniByID(@Param('id') id:string,@Param('store') token:'bravan' | 'planet'){
         try {
 
             // Validação simples do ID (opcional)
@@ -92,6 +92,27 @@ export class ProductController{
 
               // Verifica se o produto foi encontrado
             if (!resp) {
+                throw new HttpException('Produto não encontrado', HttpStatus.NOT_FOUND);
+            }
+
+            return  resp
+          } catch (error) {
+            throw new HttpException('Erro ao buscar produtos', HttpStatus.INTERNAL_SERVER_ERROR);
+          }
+    }
+
+    @Get('byId/:id')
+    async getProductsByLocalAppID(@Param('id') id:string){
+        try {
+
+            // Validação simples do ID (opcional)
+            if (!id || typeof id !== 'string') {
+              throw new HttpException('ID inválido', HttpStatus.BAD_REQUEST);
+            }
+            const resp = await this.productService.getProductById(id);
+
+              // Verifica se o produto foi encontrado
+            if (!resp || resp.length == 0) {
                 throw new HttpException('Produto não encontrado', HttpStatus.NOT_FOUND);
             }
 

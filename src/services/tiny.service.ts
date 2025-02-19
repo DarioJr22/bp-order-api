@@ -165,7 +165,9 @@ export class TinyService {
       return new HttpException('Erro ao buscar o produto', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
-
+  
+ 
+  
   async findCompanyInfo(token:string){
     try{
       const resp = await axios.get(`${URL_INFO_MEPRESA}?token=${token}&formato=json`);
