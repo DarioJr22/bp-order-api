@@ -10,11 +10,13 @@ import {
     Query,
     HttpException,
     HttpStatus,
+    NotFoundException,
   } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { CreateUsuarioDto } from '../dto/create-user.dto';
 import { UpdateUsuarioDto } from '../dto/update-user.dto';
 import { ValidateUserDto } from '../dto/validate-user.dto';
+import { User } from '../entity/user.entity';
   
   @Controller('user')
   export class UserController {
@@ -22,8 +24,15 @@ import { ValidateUserDto } from '../dto/validate-user.dto';
   
     @Post()
     async criar(@Body() usuarioDto: CreateUsuarioDto) {
-  try {
-            const resp = await  this.usuarioService.criarUsuario(usuarioDto);
+  try {      
+            let resp = new User()
+
+            const email = this.usuarioService.encontrarPorEmail(usuarioDto.email)
+            
+            if(!(email instanceof NotFoundException)){
+              resp = await  this.usuarioService.criarUsuario(usuarioDto);
+            }
+          
             return  resp
           } catch (error) {
             
