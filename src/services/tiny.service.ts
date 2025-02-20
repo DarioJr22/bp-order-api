@@ -155,7 +155,7 @@ export class TinyService {
 
 
 
-
+  //TODO (CASO CRESÇA - Proteger chamada do token)
   async findProductById(id: string,token:string) {
     try {
       const resp = await axios.get<{ retorno: { produto: ProductDto } }>(`${URLREADPROD}?token=${token}&formato=json&id=${id}`)

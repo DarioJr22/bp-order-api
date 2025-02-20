@@ -71,7 +71,7 @@ async exportToExcel(res: Response, order: Order) {
 
     async exportOrderToPdf(res: Response, order: Order) {
             const doc = new PDFDocument({ size: 'A4', margin: 50 });
-
+            
             // Definir o cabeçalho da resposta como PDF
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', 'attachment; filename=relatorio.pdf');
@@ -144,6 +144,7 @@ async exportToExcel(res: Response, order: Order) {
 
             // Linhas da tabela com os produtos
             order.products.forEach((product: ProductDto, i: number) => {
+              const preco = parseFloat(`${product.preco}`)
             let y = itemTopPosition(i);
             if (y > 750) { // Limite de uma página A4
                 doc.addPage();
@@ -172,9 +173,9 @@ async exportToExcel(res: Response, order: Order) {
             doc.fillColor('#363636').font('Helvetica').fontSize(12); // Cor do texto normal
             doc.text(product.id, 60, y + 8); // Código
             doc.text(product.nome.substring(0, 15), 125, y + 8); // Nome
-            doc.text(`R$ ${product.preco.toFixed(2)}`, 230, y + 8); // Preço
+            doc.text(`R$ ${preco.toFixed(2)}`, 230, y + 8); // Preço
             doc.text(product.quantidade.toString(), 320, y + 8); // Quantidade
-            doc.text(`R$ ${(product.preco * product.quantidade).toFixed(2)}`, 420, y + 8); // Valor Total
+            doc.text(`R$ ${(preco * product.quantidade).toFixed(2)}`, 420, y + 8); // Valor Total
             });
 
             // Finalizar o PDF
