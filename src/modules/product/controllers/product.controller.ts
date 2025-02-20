@@ -164,6 +164,20 @@ export class ProductController{
           }
     }
 
+    @Get('sheets/migradados')
+    async getMigradados(){
+        try {
+            const resp = await this.taskServic.updateSheetProducts();
+            return  resp
+          } catch (error) {
+            console.log(error);
+            
+            throw new HttpException('Erro ao recuperar os campos de filtro', HttpStatus.INTERNAL_SERVER_ERROR);
+          }
+    }
+
+
+
 
 
 }

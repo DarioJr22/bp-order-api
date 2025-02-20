@@ -129,6 +129,14 @@ export class ProductService {
       }})
   }
 
+  async getProductBySKU(id:string){
+    return this.productRepository.find({ 
+      relations:['anexos'],
+      where:{
+       codigo:id
+      }})
+  }
+
 
 
 

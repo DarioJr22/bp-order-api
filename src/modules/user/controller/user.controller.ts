@@ -8,6 +8,8 @@ import {
     Put,
     Delete,
     Query,
+    HttpException,
+    HttpStatus,
   } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { CreateUsuarioDto } from '../dto/create-user.dto';
@@ -20,7 +22,15 @@ import { ValidateUserDto } from '../dto/validate-user.dto';
   
     @Post()
     async criar(@Body() usuarioDto: CreateUsuarioDto) {
-      return this.usuarioService.criarUsuario(usuarioDto);
+  try {
+            const resp = await  this.usuarioService.criarUsuario(usuarioDto);
+            return  resp
+          } catch (error) {
+            
+            throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+          }
+
+     
     }
 
     @Post('valid-user')

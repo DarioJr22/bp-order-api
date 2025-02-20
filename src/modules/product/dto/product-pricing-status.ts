@@ -6,14 +6,14 @@ export enum ProdutoStatus {
 
 
 export class ProducPricing{
-    marketplace:string;
-    comissao:string;
+    marketplace!:string;
+    comissao!:string;
     preco_custo:number;
     preco_venda: number;
     margem_contribuicao: number;
     lucro_liquido: number;
     data_precificacao: Date;
-    status:ProdutoStatus
+    status:string
 }
 
 
