@@ -122,7 +122,11 @@ export class ProductService {
   }
 
   async getProductById(id:string){
-    return this.productRepository.findBy({id:id})
+    return this.productRepository.find({ 
+      relations:['anexos'],
+      where:{
+       id:id
+      }})
   }
 
 
