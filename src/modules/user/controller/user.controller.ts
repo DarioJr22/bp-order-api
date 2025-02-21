@@ -25,11 +25,11 @@ import { User } from '../entity/user.entity';
     @Post()
     async criar(@Body() usuarioDto: CreateUsuarioDto) {
   try {      
-            let resp = new User()
+            let resp = new User();
 
             const email = this.usuarioService.encontrarPorEmail(usuarioDto.email)
             
-            if(!(email instanceof NotFoundException)){
+            if(!email){
               resp = await  this.usuarioService.criarUsuario(usuarioDto);
             }
           
