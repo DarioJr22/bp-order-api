@@ -2,10 +2,17 @@ import { User } from 'src/modules/user/entity/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Product } from '../../product/entities/product.entity';
 export enum TipoAcao {
-  VISUALIZACAO = 'visualizacao',
-  CLIQUE = 'clique',
-  CARRINHO = 'carrinho',
-  COMPRA = 'compra',
+  /*  
+  No momento do login OK
+  No momento do cadastro OK
+  */
+  ENTRAR = 'entrarplataforma',
+  
+  VISUALIZACAO = 'visualizacaoproduto',
+  CLIQUE = 'cliqueproduto',
+  DETALHEPRODUTO = 'detalheproduto',
+  PRODUTONOCARRINHO = 'carrinhoproduto',
+  EXPORTARPEDIDO = 'exportarpedido',
 }
 
 @Entity('log_acess')

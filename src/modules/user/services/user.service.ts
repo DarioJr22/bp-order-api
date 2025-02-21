@@ -5,7 +5,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { CreateUsuarioDto } from "../dto/create-user.dto";
 
 import { UpdateUsuarioDto } from "../dto/update-user.dto";
-import { LogAcess } from "src/modules/logAcess/entity/logacesso.entity";
+import { LogAcess, TipoAcao } from "src/modules/logAcess/entity/logacesso.entity";
+import { LogAcessService } from "src/modules/logAcess/service/log-acess.service";
 
 
 @Injectable()
@@ -14,7 +15,8 @@ export class UserService{
         @InjectRepository(User)
         private readonly userRepository:Repository<User>,
         @InjectRepository(LogAcess)
-        private readonly LogAcessRepository:Repository<LogAcess>){}
+        private readonly LogAcessRepository:Repository<LogAcess>,
+      private readonly logAcessService:LogAcessService){}
 
 
 
@@ -40,6 +42,8 @@ export class UserService{
       ...usuarioDto,
       password: hashedSenha,
     });
+
+    this.logAcessService.criarLog(TipoAcao.ENTRAR,usuario)
     return this.userRepository.save(usuario);
   }
 

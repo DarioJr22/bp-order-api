@@ -17,10 +17,12 @@ import { CreateUsuarioDto } from '../dto/create-user.dto';
 import { UpdateUsuarioDto } from '../dto/update-user.dto';
 import { ValidateUserDto } from '../dto/validate-user.dto';
 import { User } from '../entity/user.entity';
+import { TipoAcao } from 'src/modules/logAcess/entity/logacesso.entity';
+import { LogAcessService } from 'src/modules/logAcess/service/log-acess.service';
   
   @Controller('user')
   export class UserController {
-    constructor(private readonly usuarioService: UserService) {}
+    constructor(private readonly usuarioService: UserService,private readonly logAcessService: LogAcessService) {}
   
     @Post()
     async criar(@Body() usuarioDto: CreateUsuarioDto) {
@@ -49,10 +51,12 @@ import { User } from '../entity/user.entity';
         console.log(validateUser);
         
             if(user.password == validateUser.password){
+              this.logAcessService.criarLog(TipoAcao.ENTRAR,user)
                 return {
                     usuarioValido:true,
                     ...user
                 }
+                
             }else{
                 return {
                     usuarioValido:false

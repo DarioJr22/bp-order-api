@@ -15,8 +15,14 @@ import { LogAcessService } from '../service/log-acess.service';
 import { UserService } from 'src/modules/user/services/user.service';
 import { ProductService } from 'src/modules/product/service/product.service';
 
+
+export class CreateLogDTO{
+  acao:TipoAcao;
+  usuarioId:string;
+  produtoId:string
+}
   
-  @Controller('log-acesso')
+  @Controller('log')
   export class LogAcessoController {
     constructor(
         private readonly logAcessoService: LogAcessService,
@@ -27,16 +33,14 @@ import { ProductService } from 'src/modules/product/service/product.service';
   
     @Post()
     async criarLog(
-      @Body('acao') acao: TipoAcao,
-      @Body('usuarioId') usuarioId: string,
-      @Body('produtoId') produtoId?: string,
+      @Body() logDTO: CreateLogDTO
     ) {
 
-      let user = await this.user.encontrarPorId(usuarioId);
-      let product = await this.prod.encontrarPorId(produtoId)
+      let user = await this.user.encontrarPorId(logDTO.usuarioId);
+      let product = await this.prod.encontrarPorId(logDTO.produtoId)
 
       return this.logAcessoService.criarLog(
-        acao,
+        logDTO.acao,
         user,
         product,
       );
