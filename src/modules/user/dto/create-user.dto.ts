@@ -1,5 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { Role } from '../entity/role';
+import { Address } from 'src/modules/address/address.entity';
 
 export class CreateUsuarioDto {
   @IsEmail()
@@ -17,12 +18,16 @@ export class CreateUsuarioDto {
   username?: string;
 
   @IsString()
-  telefone?: string;
+  phone?: string;
 
   @IsString()
   token:string;
   
-  role:Role
+  role:Role/* 
+
+  address:Address */
+
+
 
 
 }
