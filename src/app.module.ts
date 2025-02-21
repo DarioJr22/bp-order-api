@@ -26,6 +26,8 @@ import { Address } from './modules/address/address.entity';
 import { LogAcess } from './modules/logAcess/entity/logacesso.entity';
 import { UserController } from './modules/user/controller/user.controller';
 import { GoogleSheetsService } from './services/google-sheet.service';
+import { LogAcessService } from './modules/logAcess/service/log-acess.service';
+import { LogAcessoController } from './modules/logAcess/controller/log-acess.controller';
 //import Redis from 'ioredis';
 
 dotenv.config()
