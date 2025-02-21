@@ -27,7 +27,7 @@ import { User } from '../entity/user.entity';
   try {      
             let resp = new User();
 
-            const email = this.usuarioService.encontrarPorEmail(usuarioDto.email)
+            const email = await this.usuarioService.encontrarPorEmail(usuarioDto.email)
             
             if(!email){
               resp = await  this.usuarioService.criarUsuario(usuarioDto);
