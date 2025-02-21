@@ -25,6 +25,7 @@ import { TaskService } from './services/task.service';
 import { Address } from './modules/address/address.entity';
 import { LogAcess } from './modules/logAcess/entity/logacesso.entity';
 import { UserController } from './modules/user/controller/user.controller';
+import { GoogleSheetsService } from './services/google-sheet.service';
 //import Redis from 'ioredis';
 
 dotenv.config()
@@ -68,6 +69,7 @@ dotenv.config()
     ErpDataProcessor,
     UserService,
     TaskService,
+    GoogleSheetsService
     ]
 })
 export class AppModule {}
