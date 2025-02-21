@@ -58,7 +58,7 @@ dotenv.config()
     }),
     ScheduleModule.forRoot(),
   ],
-  controllers: [AppController,ProductController, OrderController, ReportController,EmailController,UserController],
+  controllers: [AppController,ProductController, OrderController, ReportController,EmailController,UserController,LogAcessoController],
   providers: [
     AppService,
     TinyService, 
@@ -69,7 +69,8 @@ dotenv.config()
     ErpDataProcessor,
     UserService,
     TaskService,
-    GoogleSheetsService
+    GoogleSheetsService,
+    LogAcessService
     ]
 })
 export class AppModule {}
