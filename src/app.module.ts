@@ -35,16 +35,15 @@ dotenv.config()
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres', // Tipo de banco de dados
+      type: 'postgres', 
       host: process.env.PGHOST,
       port: 5432,
       username:  process.env.PGUSER,
       password:  process.env.PGPASSWORD,
       database:  process.env.PGDATABASE,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'], // Onde o TypeORM vai procurar as entidades
-      synchronize: true, // NÃO USE EM PRODUÇÃO! Sincroniza o banco automaticamente
+      entities: [__dirname + '/**/*.entity{.ts,.js}'], 
+      synchronize: true,
     }),
-    // Registrar as entidades específicas com TypeOrmModule.forFeature
     TypeOrmModule.forFeature([Product, AnexoEntity,Order,Address,LogAcess,User]),
     BullModule.forRoot({
       connection: new Redis(`${process.env.REDIS_URL}?family=0`,

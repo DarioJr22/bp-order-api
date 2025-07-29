@@ -148,7 +148,6 @@ export class Product {
   @Column({ nullable: true })
   categoria: string;
 
-  // Relação OneToMany entre Product e AnexoEntity
   @OneToMany(() => AnexoEntity, (anexo) => anexo.product, { cascade: true })
   anexos: AnexoEntity[];
 
@@ -173,7 +172,6 @@ export class Product {
   @Column({ nullable: true })
   slug: string;
 
-  // Propriedades adicionais
 
   @Column('decimal', { nullable: true, precision: 10, scale: 2 })
   desconto: number;
