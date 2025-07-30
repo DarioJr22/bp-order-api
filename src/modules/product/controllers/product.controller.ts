@@ -1,4 +1,4 @@
-import {  Body, Controller, Delete, Get, HttpException, HttpStatus, Logger, Param, Put, Query } from "@nestjs/common";
+import {  BadRequestException, Body, Controller, DefaultValuePipe, Delete, Get, HttpException, HttpStatus, Logger, Param, ParseIntPipe, Put, Query } from "@nestjs/common";
 import { TinyService } from "src/services/tiny.service";
 
 import { ProductService } from "../service/product.service";
@@ -86,7 +86,6 @@ export class ProductController{
     async getProductsFromTyniByID(@Param('id') id:string,@Param('store') token:'bravan' | 'planet'){
         try {
 
-            // Validação simples do ID (opcional)
             if (!id || typeof id !== 'string') {
               throw new HttpException('ID inválido', HttpStatus.BAD_REQUEST);
             }
@@ -178,6 +177,79 @@ export class ProductController{
 
 
 
+    @Get('pricing-status/:status')
+    async getProductsByPricingStatus(
+      @Param('status') status: ProdutoStatus,
+      @Query('page') page: number = 1,
+      @Query('pageSize') pageSize: number = 10
+    ) {
+      try {
+        const result = await this.productService.findProductsByPricingStatus(status, page, pageSize);
+        return result;
+      } catch (error) {
+        console.error('Erro ao buscar produtos por status de precificação:', error);
+        throw new HttpException('Erro ao buscar produtos por status de precificação', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
 
 
+    @Get('pricing-summary/status')
+    async getPricingSummary() {
+
+       try {
+      const summary = await this.productService.getPricingStatusSummary();
+
+      return {
+        success: true,
+        message: 'Resumo de status obtido com sucesso',
+        data: summary
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Erro ao obter resumo de status',
+        error: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      };
+    }
+    }
+
+
+  @Get('search/name')
+  async searchByName(
+    @Query('name') name: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number = 10
+  ) {
+    if (!name) {
+      throw new BadRequestException('O parâmetro "name" é obrigatório');
+    }
+    
+    const result = await this.productService.findProductsByName(name, page, pageSize);
+    
+    return {
+      success: true,
+      message: `Encontrados ${result.count} produtos para "${name}"`,
+      data: result
+    };
+  }
+
+  @Get('search/sku-gtin')
+  async searchBySkuOrGtin(
+    @Query('term') term: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number = 10
+  ) {
+    if (!term) {
+      throw new BadRequestException('O parâmetro "term" é obrigatório');
+    }
+    
+    const result = await this.productService.findProductsBySkuOrGtin(term, page, pageSize);
+    
+    return {
+      success: true,
+      message: `Encontrados ${result.count} produtos para "${term}"`,
+      data: result
+    };
+  }
 }

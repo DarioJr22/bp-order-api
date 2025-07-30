@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Like, Repository } from 'typeorm';
 import { AnexoEntity, Product } from '../entities/product.entity';
@@ -225,6 +225,153 @@ export class ProductService {
     })
   }
 
+async findProductsByPricingStatus(
+  status: string,
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{ data: Product[]; count: number; totalPages: number }> {
+  const skip = (page - 1) * pageSize;
+  const countQuery = this.productRepository
+    .createQueryBuilder('product')
+    .where(`EXISTS (
+      SELECT 1 
+      FROM jsonb_array_elements(CAST("product"."preco_marketplace" AS jsonb)) AS price
+      WHERE price->>'status' = :status
+    )`, { status })
+    .andWhere('product.preco_marketplace IS NOT NULL');
+
+  const total = await countQuery.getCount();
+  const query = this.productRepository
+    .createQueryBuilder('product')
+    .where(`EXISTS (
+      SELECT 1 
+      FROM jsonb_array_elements(CAST("product"."preco_marketplace" AS jsonb)) AS price
+      WHERE price->>'status' = :status
+    )`, { status })
+    .andWhere('product.preco_marketplace IS NOT NULL')
+    .orderBy('product.id', 'ASC')
+    .skip(skip)
+    .take(pageSize);
+
+  const data = await query.getMany();
+  const totalPages = Math.ceil(total / pageSize);
+
+  return {
+    data,
+    count: total,
+    totalPages
+  };
+}
+async getPricingStatusSummary(): Promise<{
+  totalProducts: number;
+  statusCounts: Record<string, number>;
+  statusDetails: { status: string; count: number }[];
+}> {
+  try {
+    const totalProducts = await this.productRepository
+      .createQueryBuilder('product')
+      .where('product.preco_marketplace IS NOT NULL')
+      .getCount();
+
+    console.log('Total de produtos com preco_marketplace:', totalProducts);
+    const summaryQuery = `
+      WITH valid_data AS (
+        SELECT
+          id,
+          CASE 
+            WHEN jsonb_typeof(CAST(preco_marketplace AS jsonb)) = 'array' 
+            THEN CAST(preco_marketplace AS jsonb) 
+            ELSE '[]'::jsonb 
+          END AS safe_marketplace
+        FROM produto
+        WHERE preco_marketplace IS NOT NULL
+      )
+      SELECT 
+        status,
+        COUNT(DISTINCT product_id) as count
+      FROM (
+        SELECT
+          vd.id as product_id,
+          jsonb_array_elements(vd.safe_marketplace)->>'status' as status
+        FROM valid_data vd
+      ) AS subquery
+      WHERE status IS NOT NULL AND status != ''
+      GROUP BY status
+    `;
+
+    const statusResults = await this.productRepository.query(summaryQuery);
+    const statusCounts: Record<string, number> = {};
+    const statusDetails: { status: string; count: number }[] = [];
+
+    statusResults.forEach((row: any) => {
+      statusCounts[row.status] = Number(row.count);
+      statusDetails.push({
+        status: row.status,
+        count: Number(row.count)
+      });
+    });
+
+    return {
+      totalProducts,
+      statusCounts,
+      statusDetails
+    };
+  } catch (error) {
+    console.error('Erro detalhado ao gerar resumo de status:', error);
+    throw new InternalServerErrorException(
+      'Erro ao gerar resumo de status: ' + error.message
+    );
+  }
+}
+
+async findProductsByName(
+  name: string,
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{ data: Product[]; count: number; totalPages: number }> {
+  const skip = (page - 1) * pageSize;
+  
+  const [data, total] = await this.productRepository
+    .createQueryBuilder('product')
+    .where('product.nome ILIKE :name', { name: `%${name}%` }) // ILIKE para case-insensitive
+    .orderBy('product.nome', 'ASC')
+    .skip(skip)
+    .take(pageSize)
+    .getManyAndCount();
+
+  const totalPages = Math.ceil(total / pageSize);
+
+  return {
+    data,
+    count: total,
+    totalPages
+  };
+}
+
+async findProductsBySkuOrGtin(
+  searchTerm: string,
+  page: number = 1,
+  pageSize: number = 10
+): Promise<{ data: Product[]; count: number; totalPages: number }> {
+  const skip = (page - 1) * pageSize;
+  
+  const [data, total] = await this.productRepository
+    .createQueryBuilder('product')
+    .where('product.codigo = :searchTerm', { searchTerm })
+    .orWhere('product.gtin = :searchTerm', { searchTerm })
+    .orderBy('product.nome', 'ASC')
+    .skip(skip)
+    .take(pageSize)
+    .getManyAndCount();
+
+  const totalPages = Math.ceil(total / pageSize);
+
+  return {
+    data,
+    count: total,
+    totalPages
+  };
+}
   
 
 
