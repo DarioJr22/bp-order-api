@@ -137,6 +137,23 @@ export class ProductService {
       }})
   }
 
+  /**
+   * Obtém as configurações de preço por marketplace de um produto
+   * @param codigo Código do produto
+   */
+  async getMarketplacePricings(codigo: string): Promise<ProducPricing[]> {
+    const product = await this.productRepository.findOne({ 
+      where: { codigo },
+      select: ["preco_marketplace"] // Seleciona apenas o campo necessário
+    });
+    
+    if (!product) {
+      throw new NotFoundException(`Produto com código ${codigo} não encontrado`);
+    }
+    
+    return product.preco_marketplace || [];
+  }
+
 
 
 
@@ -223,6 +240,83 @@ export class ProductService {
     {
       preco_marketplace:preco
     })
+  }
+
+  /**
+   * Adiciona uma nova configuração de preço de marketplace para um produto
+   * @param codigo Código do produto
+   * @param newPricing Nova configuração de preço a ser adicionada
+   */
+  async addMarketplacePricing(codigo: string, newPricing: ProducPricing): Promise<ProducPricing[]> {
+    // Busca o produto pelo código apenas para validar existência
+    const product = await this.productRepository.findOne({ where: { codigo } });
+    
+    if (!product) {
+      throw new NotFoundException(`Produto com código ${codigo} não encontrado`);
+    }
+    
+    // Obter as configurações de preço atuais
+    let currentPricings = product.preco_marketplace || [];
+    
+    // Cria uma cópia do array para trabalhar com ele
+    const updatedPricings = [...currentPricings];
+    
+    // Verifica se já existe configuração para este marketplace
+    const existingIndex = updatedPricings.findIndex(
+      p => p.marketplace.toLowerCase() === newPricing.marketplace.toLowerCase()
+    );
+    
+    if (existingIndex >= 0) {
+      // Se já existe, atualiza
+      updatedPricings[existingIndex] = newPricing;
+    } else {
+      // Se não existe, adiciona
+      updatedPricings.push(newPricing);
+    }
+    
+    // Usar update ao invés de save para evitar problemas com relacionamentos
+    await this.productRepository.update({ codigo }, { 
+      preco_marketplace: updatedPricings 
+    });
+    
+    return updatedPricings;
+  }
+  
+  /**
+   * Remove uma configuração de preço de marketplace para um produto
+   * @param codigo Código do produto
+   * @param marketplaceName Nome do marketplace a ser removido
+   */
+  async deleteMarketplacePricing(codigo: string, marketplaceName: string): Promise<ProducPricing[]> {
+    // Busca o produto pelo código apenas para validar existência
+    const product = await this.productRepository.findOne({ where: { codigo } });
+    
+    if (!product) {
+      throw new NotFoundException(`Produto com código ${codigo} não encontrado`);
+    }
+    
+    // Verifica se o produto tem configurações de preço
+    if (!product.preco_marketplace || product.preco_marketplace.length === 0) {
+      throw new NotFoundException(`Produto não possui configurações de preço para marketplaces`);
+    }
+    
+    // Filtra removendo o marketplace especificado
+    const initialLength = product.preco_marketplace.length;
+    const updatedPricings = product.preco_marketplace.filter(
+      p => p.marketplace.toLowerCase() !== marketplaceName.toLowerCase()
+    );
+    
+    // Verifica se algo foi removido
+    if (updatedPricings.length === initialLength) {
+      throw new NotFoundException(`Marketplace ${marketplaceName} não encontrado nas configurações`);
+    }
+    
+    // Usar update ao invés de save para evitar problemas com relacionamentos
+    await this.productRepository.update({ codigo }, { 
+      preco_marketplace: updatedPricings 
+    });
+    
+    return updatedPricings;
   }
 
 async findProductsByPricingStatus(

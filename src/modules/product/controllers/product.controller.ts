@@ -1,10 +1,11 @@
-import {  BadRequestException, Body, Controller, DefaultValuePipe, Delete, Get, HttpException, HttpStatus, Logger, Param, ParseIntPipe, Put, Query } from "@nestjs/common";
+import {  BadRequestException, Body, Controller, DefaultValuePipe, Delete, Get, HttpException, HttpStatus, Logger, Param, ParseIntPipe, Post, Put, Query } from "@nestjs/common";
 import { TinyService } from "src/services/tiny.service";
 
 import { ProductService } from "../service/product.service";
 import { SearchProductDto } from "../dto/searchProduct";
 import { TaskService } from "src/services/task.service";
 import { ProducPricing, ProdutoStatus } from "../dto/product-pricing-status";
+import { AddMarketplacePricingDto, DeleteMarketplacePricingDto, MarketplacePricingResponseDto } from "../dto/marketplace-pricing.dto";
 
 @Controller('product')
 export class ProductController{
@@ -27,6 +28,78 @@ export class ProductController{
       productpricing.codigo,
       productpricing.preco)
 
+    }
+
+    /**
+     * Adiciona uma nova configuração de preço de marketplace para um produto
+     */
+    @Post('marketplace-pricing')
+    async addMarketplacePricing(@Body() dto: AddMarketplacePricingDto): Promise<MarketplacePricingResponseDto> {
+      try {
+        const updatedPricings = await this.productService.addMarketplacePricing(
+          dto.codigo,
+          dto.pricing
+        );
+        
+        return {
+          success: true,
+          message: `Configuração de preço para ${dto.pricing.marketplace} adicionada com sucesso`,
+          data: updatedPricings
+        };
+      } catch (error) {
+        Logger.error(`Erro ao adicionar configuração de preço: ${error.message}`, error.stack);
+        return {
+          success: false,
+          message: error.message || 'Erro ao adicionar configuração de preço'
+        };
+      }
+    }
+    
+    /**
+     * Remove uma configuração de preço de marketplace para um produto
+     */
+    @Delete('marketplace-pricing')
+    async deleteMarketplacePricing(@Body() dto: DeleteMarketplacePricingDto): Promise<MarketplacePricingResponseDto> {
+      try {
+        const updatedPricings = await this.productService.deleteMarketplacePricing(
+          dto.codigo,
+          dto.marketplace
+        );
+        
+        return {
+          success: true,
+          message: `Configuração de preço para ${dto.marketplace} removida com sucesso`,
+          data: updatedPricings
+        };
+      } catch (error) {
+        Logger.error(`Erro ao remover configuração de preço: ${error.message}`, error.stack);
+        return {
+          success: false,
+          message: error.message || 'Erro ao remover configuração de preço'
+        };
+      }
+    }
+    
+    /**
+     * Lista todas as configurações de preço por marketplace de um produto
+     */
+    @Get('marketplace-pricing/:codigo')
+    async getMarketplacePricings(@Param('codigo') codigo: string): Promise<MarketplacePricingResponseDto> {
+      try {
+        const pricings = await this.productService.getMarketplacePricings(codigo);
+        
+        return {
+          success: true,
+          message: 'Configurações de preço obtidas com sucesso',
+          data: pricings
+        };
+      } catch (error) {
+        Logger.error(`Erro ao obter configurações de preço: ${error.message}`, error.stack);
+        return {
+          success: false,
+          message: error.message || 'Erro ao obter configurações de preço'
+        };
+      }
     }
 
     @Get('update-admin-products/:email')
